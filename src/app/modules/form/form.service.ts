@@ -39,7 +39,8 @@ const createForm = async (
 // Get All Forms (can also filter)
 const getAllForms = async (
   filters: IFormFilters,
-  paginationOptions: IPaginationOptions
+  paginationOptions: IPaginationOptions,
+  verifiedUser: any
 ): Promise<IGenericResponse<IForm[]>> => {
   // Try not to use any
   const { searchTerm, ...filtersData } = filters;
@@ -74,12 +75,16 @@ const getAllForms = async (
   const whereCondition =
     andConditions?.length > 0 ? { $and: andConditions } : {};
 
-  const result = await Form.find(whereCondition)
+  const result = await Form.find({
+    $and: [whereCondition, { email: verifiedUser?.email }],
+  })
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
 
-  const total = await Form.countDocuments(whereCondition);
+  const total = await Form.countDocuments({
+    $and: [whereCondition, { email: verifiedUser?.email }],
+  });
 
   return {
     meta: {

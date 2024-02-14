@@ -41,7 +41,17 @@ const getAllForms: RequestHandler = catchAsync(
     const filters = pick(req.query, formFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
 
-    const result = await FormService.getAllForms(filters, paginationOptions);
+    const token: any = req.headers.authorization;
+    const verifiedUser = jwtHelpers.verifyToken(
+      token,
+      config.jwt.secret as Secret
+    );
+
+    const result = await FormService.getAllForms(
+      filters,
+      paginationOptions,
+      verifiedUser
+    );
 
     // Send Response
     sendResponse<IForm[]>(res, {

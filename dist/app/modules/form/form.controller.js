@@ -51,7 +51,9 @@ const createForm = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const getAllForms = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, form_constants_1.formFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
-    const result = yield form_service_1.FormService.getAllForms(filters, paginationOptions);
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const result = yield form_service_1.FormService.getAllForms(filters, paginationOptions, verifiedUser);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

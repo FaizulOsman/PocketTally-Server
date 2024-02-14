@@ -47,7 +47,7 @@ const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     return result;
 });
 // Get All Forms (can also filter)
-const getAllForms = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = []; // Try not to use any
@@ -72,11 +72,19 @@ const getAllForms = (filters, paginationOptions) => __awaiter(void 0, void 0, vo
     const sortCondition = sortBy &&
         sortOrder && { [sortBy]: sortOrder };
     const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
-    const result = yield form_model_1.Form.find(whereCondition)
+    const result = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? whereCondition
+        : {
+            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
+        })
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
-    const total = yield form_model_1.Form.countDocuments(whereCondition);
+    const total = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? whereCondition
+        : {
+            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
+        });
     return {
         meta: {
             page,

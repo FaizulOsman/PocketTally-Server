@@ -67,8 +67,14 @@ const getAllForms: RequestHandler = catchAsync(
 // Get single Form by id
 const getSingleForm: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
+    const token: any = req.headers.authorization;
+    const verifiedUser = jwtHelpers.verifyToken(
+      token,
+      config.jwt.secret as Secret
+    );
+
     const id = req.params.id;
-    const result = await FormService.getSingleForm(id);
+    const result = await FormService.getSingleForm(verifiedUser, id);
 
     // Send Response
     sendResponse<IForm>(res, {

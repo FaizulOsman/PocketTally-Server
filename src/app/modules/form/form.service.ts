@@ -75,16 +75,24 @@ const getAllForms = async (
   const whereCondition =
     andConditions?.length > 0 ? { $and: andConditions } : {};
 
-  const result = await Form.find({
-    $and: [whereCondition, { email: verifiedUser?.email }],
-  })
+  const result = await Form.find(
+    verifiedUser?.role === 'admin'
+      ? whereCondition
+      : {
+          $and: [whereCondition, { email: verifiedUser?.email }],
+        }
+  )
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
 
-  const total = await Form.countDocuments({
-    $and: [whereCondition, { email: verifiedUser?.email }],
-  });
+  const total = await Form.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? whereCondition
+      : {
+          $and: [whereCondition, { email: verifiedUser?.email }],
+        }
+  );
 
   return {
     meta: {

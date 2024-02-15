@@ -23,37 +23,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FormService = void 0;
-const form_model_1 = require("./form.model");
+exports.FormDataService = void 0;
+const formData_model_1 = require("./formData.model");
 const http_status_1 = __importDefault(require("http-status"));
-const form_constants_1 = require("./form.constants");
+const formData_constants_1 = require("./formData.constants");
 const user_model_1 = require("../user/user.model");
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const paginationHelper_1 = require("../../../helper/paginationHelper");
-// Create Form
-const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+// Create
+const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.find({ _id: verifiedUser.id });
     if (user.length === 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
     }
-    const isExist = yield form_model_1.Form.find({
-        $and: [{ email: payload === null || payload === void 0 ? void 0 : payload.email }, { formName: payload === null || payload === void 0 ? void 0 : payload.formName }],
-    });
-    console.log('Already Exist: ', isExist);
-    if (isExist.length > 0) {
-        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You already have a from with this name.');
-    }
-    const result = yield form_model_1.Form.create(payload);
+    const result = yield formData_model_1.FormData.create(payload);
     return result;
 });
-// Get All Forms (can also filter)
-const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+// Get All
+const getAllData = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = []; // Try not to use any
     if (searchTerm) {
         andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
-            $or: form_constants_1.formSearchableFields === null || form_constants_1.formSearchableFields === void 0 ? void 0 : form_constants_1.formSearchableFields.map(field => ({
+            $or: formData_constants_1.formDataSearchableFields === null || formData_constants_1.formDataSearchableFields === void 0 ? void 0 : formData_constants_1.formDataSearchableFields.map(field => ({
                 [field]: {
                     $regex: searchTerm,
                     $options: 'i',
@@ -72,7 +65,7 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
     const sortCondition = sortBy &&
         sortOrder && { [sortBy]: sortOrder };
     const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
-    const result = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+    const result = yield formData_model_1.FormData.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? whereCondition
         : {
             $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
@@ -80,7 +73,7 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
-    const total = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+    const total = yield formData_model_1.FormData.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? whereCondition
         : {
             $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
@@ -94,51 +87,41 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
         data: result,
     };
 });
-// Get Single Form
-const getSingleForm = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, function* () {
-    if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) !== 'admin') {
-        const form = yield form_model_1.Form.findById(id);
-        console.log(form);
-        if ((form === null || form === void 0 ? void 0 : form.email) !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email)) {
-            throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to access this!');
-        }
-    }
-    const result = yield form_model_1.Form.findById(id);
+// Get Single
+const getSingleData = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, function* () {
+    // const formData = await FormData.findById(id);
+    // console.log(formData);
+    // if (formData?.userEmail !== verifiedUser?.email) {
+    //   throw new ApiError(
+    //     httpStatus.NOT_FOUND,
+    //     'You are not authorized to access this!'
+    //   );
+    // }
+    const result = yield formData_model_1.FormData.findById(id);
     return result;
 });
-const updateForm = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield form_model_1.Form.findOne({ _id: id });
+const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const isExist = yield formData_model_1.FormData.findOne({ _id: id });
     if (!isExist) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Form not found');
     }
-    const result = yield form_model_1.Form.findOneAndUpdate({ _id: id }, payload, {
+    const result = yield formData_model_1.FormData.findOneAndUpdate({ _id: id }, payload, {
         new: true,
     });
     return result;
 });
 // Delete Form
-const deleteForm = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield form_model_1.Form.findByIdAndDelete(id);
+const deleteData = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield formData_model_1.FormData.findByIdAndDelete(id);
     if (!result) {
         throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Form Not Found');
     }
     return result;
 });
-const addReview = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield form_model_1.Form.findOne({ _id: id });
-    if (!isExist) {
-        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Form not found');
-    }
-    const result = yield form_model_1.Form.findOneAndUpdate({ _id: id }, { $push: { reviews: payload } }, {
-        new: true,
-    }).populate('reviews');
-    return result;
-});
-exports.FormService = {
-    createForm,
-    getAllForms,
-    getSingleForm,
-    updateForm,
-    deleteForm,
-    addReview,
+exports.FormDataService = {
+    createData,
+    getAllData,
+    getSingleData,
+    updateData,
+    deleteData,
 };

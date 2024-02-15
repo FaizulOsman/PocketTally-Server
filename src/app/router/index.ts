@@ -2,6 +2,7 @@ import express from 'express';
 import { AuthRouter } from '../modules/auth/auth.router';
 import { UserRoutes } from '../modules/user/user.router';
 import { FormRoutes } from '../modules/form/form.route';
+import { FormDataRoutes } from '../modules/formData/formData.route';
 
 const router = express.Router();
 
@@ -17,6 +18,10 @@ const moduleRoutes = [
   {
     path: '/forms',
     route: FormRoutes,
+  },
+  {
+    path: '/formData',
+    route: FormDataRoutes,
   },
 ];
 

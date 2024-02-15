@@ -109,13 +109,15 @@ const getSingleForm = async (
   verifiedUser: any,
   id: string
 ): Promise<IForm | null> => {
-  const form = await Form.findById(id);
-  console.log(form);
-  if (form?.email !== verifiedUser?.email) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      'You are not authorized to access this!'
-    );
+  if (verifiedUser?.role !== 'admin') {
+    const form = await Form.findById(id);
+    console.log(form);
+    if (form?.email !== verifiedUser?.email) {
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        'You are not authorized to access this!'
+      );
+    }
   }
 
   const result = await Form.findById(id);

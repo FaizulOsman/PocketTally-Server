@@ -100,11 +100,25 @@ const updateData: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
-// Delete
+// Delete Single
 const deleteData: RequestHandler = catchAsync(async (req, res) => {
   const id = req.params.id;
 
   const result = await FormDataService.deleteData(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Data deleted successfully',
+    data: result,
+  });
+});
+
+// Delete Many
+const deleteMany: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id;
+
+  const result = await FormDataService.deleteMany(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -120,4 +134,5 @@ export const FormDataController = {
   getSingleData,
   updateData,
   deleteData,
+  deleteMany,
 };

@@ -6,6 +6,8 @@ const router = express.Router();
 // Routes
 router.post('/create', FormDataController.createData);
 
+router.delete('/delete-many/:id', FormDataController.deleteMany);
+
 router.get('/:id', FormDataController.getSingleData);
 
 router.delete('/:id', FormDataController.deleteData);

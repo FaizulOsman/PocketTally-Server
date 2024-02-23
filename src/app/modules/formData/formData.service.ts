@@ -128,11 +128,20 @@ const updateData = async (
   return result;
 };
 
-// Delete Form
+// Delete Single
 const deleteData = async (id: string): Promise<IFormData | null> => {
   const result = await FormData.findByIdAndDelete(id);
   if (!result) {
-    throw new ApiError(httpStatus.FORBIDDEN, 'Form Not Found');
+    throw new ApiError(httpStatus.FORBIDDEN, 'Data Not Found');
+  }
+  return result;
+};
+
+// Delete Many
+const deleteMany = async (id: string): Promise<any> => {
+  const result = await FormData.deleteMany({ formId: id });
+  if (!result) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Data Not Found');
   }
   return result;
 };
@@ -143,4 +152,5 @@ export const FormDataService = {
   getSingleData,
   updateData,
   deleteData,
+  deleteMany,
 };

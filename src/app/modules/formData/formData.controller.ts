@@ -40,17 +40,7 @@ const getAllData: RequestHandler = catchAsync(
     const filters = pick(req.query, formDataFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
 
-    const token: any = req.headers.authorization;
-    const verifiedUser = jwtHelpers.verifyToken(
-      token,
-      config.jwt.secret as Secret
-    );
-
-    const result = await FormDataService.getAllData(
-      filters,
-      paginationOptions,
-      verifiedUser
-    );
+    const result = await FormDataService.getAllData(filters, paginationOptions);
 
     // Send Response
     sendResponse(res, {

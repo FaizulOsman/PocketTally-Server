@@ -9,6 +9,7 @@ const formData_controller_1 = require("./formData.controller");
 const router = express_1.default.Router();
 // Routes
 router.post('/create', formData_controller_1.FormDataController.createData);
+router.delete('/delete-many/:id', formData_controller_1.FormDataController.deleteMany);
 router.get('/:id', formData_controller_1.FormDataController.getSingleData);
 router.delete('/:id', formData_controller_1.FormDataController.deleteData);
 router.patch('/:id', formData_controller_1.FormDataController.updateData);

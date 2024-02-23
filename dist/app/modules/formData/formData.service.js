@@ -40,7 +40,7 @@ const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     return result;
 });
 // Get All
-const getAllData = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = []; // Try not to use any
@@ -65,19 +65,11 @@ const getAllData = (filters, paginationOptions, verifiedUser) => __awaiter(void 
     const sortCondition = sortBy &&
         sortOrder && { [sortBy]: sortOrder };
     const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
-    const result = yield formData_model_1.FormData.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? whereCondition
-        : {
-            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
-        })
+    const result = yield formData_model_1.FormData.find(whereCondition)
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
-    const total = yield formData_model_1.FormData.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? whereCondition
-        : {
-            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
-        });
+    const total = yield formData_model_1.FormData.countDocuments(whereCondition);
     return {
         meta: {
             page,
@@ -110,11 +102,19 @@ const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* 
     });
     return result;
 });
-// Delete Form
+// Delete Single
 const deleteData = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield formData_model_1.FormData.findByIdAndDelete(id);
     if (!result) {
-        throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Form Not Found');
+        throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Data Not Found');
+    }
+    return result;
+});
+// Delete Many
+const deleteMany = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield formData_model_1.FormData.deleteMany({ formId: id });
+    if (!result) {
+        throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Data Not Found');
     }
     return result;
 });
@@ -124,4 +124,5 @@ exports.FormDataService = {
     getSingleData,
     updateData,
     deleteData,
+    deleteMany,
 };

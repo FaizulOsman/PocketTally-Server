@@ -51,9 +51,7 @@ const createData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const getAllData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, formData_constants_1.formDataFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
-    const token = req.headers.authorization;
-    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield formData_service_1.FormDataService.getAllData(filters, paginationOptions, verifiedUser);
+    const result = yield formData_service_1.FormDataService.getAllData(filters, paginationOptions);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -89,10 +87,21 @@ const updateData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
-// Delete
+// Delete Single
 const deleteData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const result = yield formData_service_1.FormDataService.deleteData(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Data deleted successfully',
+        data: result,
+    });
+}));
+// Delete Many
+const deleteMany = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const result = yield formData_service_1.FormDataService.deleteMany(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -106,4 +115,5 @@ exports.FormDataController = {
     getSingleData,
     updateData,
     deleteData,
+    deleteMany,
 };

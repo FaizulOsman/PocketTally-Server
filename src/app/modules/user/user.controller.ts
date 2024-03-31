@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RequestHandler } from 'express';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
@@ -7,6 +8,9 @@ import { UserService } from './user.service';
 import { pick } from '../../../shared/pick';
 import { UserFilterableFields } from './user.constants';
 import { paginationFields } from '../../../constants/pagination';
+import { jwtHelpers } from '../../../helper/jwtHelpers';
+import config from '../../../config';
+import { Secret } from 'jsonwebtoken';
 
 const getAllUser: RequestHandler = catchAsync(async (req, res) => {
   const filters = pick(req.query, UserFilterableFields);
@@ -61,8 +65,12 @@ const deleteUser: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getMyProfile: RequestHandler = catchAsync(async (req, res) => {
-  const user = req.user;
-  const result = await UserService.getMyProfile(user);
+  const token: any = req.headers.authorization;
+  const verifiedUser = jwtHelpers.verifyToken(
+    token,
+    config.jwt.secret as Secret
+  );
+  const result = await UserService.getMyProfile(verifiedUser);
 
   sendResponse<IUser>(res, {
     statusCode: httpStatus.OK,

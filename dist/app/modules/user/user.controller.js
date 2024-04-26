@@ -31,6 +31,8 @@ const user_service_1 = require("./user.service");
 const pick_1 = require("../../../shared/pick");
 const user_constants_1 = require("./user.constants");
 const pagination_1 = require("../../../constants/pagination");
+const jwtHelpers_1 = require("../../../helper/jwtHelpers");
+const config_1 = __importDefault(require("../../../config"));
 const getAllUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, user_constants_1.UserFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
@@ -75,8 +77,9 @@ const deleteUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     });
 }));
 const getMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = req.user;
-    const result = yield user_service_1.UserService.getMyProfile(user);
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const result = yield user_service_1.UserService.getMyProfile(verifiedUser);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

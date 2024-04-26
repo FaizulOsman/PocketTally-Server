@@ -96,8 +96,8 @@ const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.User.findOneAndDelete({ _id: id });
     return result;
 });
-const getMyProfile = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.findById({ _id: payload === null || payload === void 0 ? void 0 : payload.id });
+const getMyProfile = (verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_model_1.User.findOne({ email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email });
     return result;
 });
 const updateMyProfile = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {

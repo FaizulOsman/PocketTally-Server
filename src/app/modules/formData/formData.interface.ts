@@ -10,6 +10,5 @@ export type FormDataModel = Model<IFormData, Record<string, unknown>>;
 
 export type IFormDataFilters = {
   searchTerm?: string;
-  userEmail?: string;
-  formId?: string;
+  data?: string;
 };

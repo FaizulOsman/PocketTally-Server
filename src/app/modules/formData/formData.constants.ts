@@ -1,3 +1,3 @@
-export const formDataFilterableFields = ['searchTerm', 'formId'];
+export const formDataFilterableFields = ['searchTerm', 'data'];
 
-export const formDataSearchableFields = ['searchTerm', 'formId'];
+export const formDataSearchableFields = ['searchTerm', 'data'];

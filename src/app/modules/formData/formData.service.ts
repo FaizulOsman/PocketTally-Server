@@ -85,7 +85,7 @@ const getSingleData = async (
   verifiedUser: any,
   id: string
 ): Promise<IFormData | null> => {
-  // const formData = await FormData.findById(id);
+  // const formData = await FormData.findById({ _id: id });
   // console.log(formData);
   // if (formData?.userEmail !== verifiedUser?.email) {
   //   throw new ApiError(
@@ -94,7 +94,7 @@ const getSingleData = async (
   //   );
   // }
 
-  const result = await FormData.findById(id);
+  const result = await FormData.findById({ _id: id });
 
   return result;
 };
@@ -117,7 +117,7 @@ const updateData = async (
 
 // Delete Single
 const deleteData = async (id: string): Promise<IFormData | null> => {
-  const result = await FormData.findByIdAndDelete(id);
+  const result = await FormData.findByIdAndDelete({ _id: id });
   if (!result) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Data Not Found');
   }

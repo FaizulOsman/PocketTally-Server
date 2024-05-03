@@ -110,7 +110,7 @@ const getSingleForm = async (
   id: string
 ): Promise<IForm | null> => {
   if (verifiedUser?.role !== 'admin') {
-    const form = await Form.findById(id);
+    const form = await Form.findById({ _id: id });
 
     if (form?.email !== verifiedUser?.email) {
       throw new ApiError(
@@ -120,7 +120,7 @@ const getSingleForm = async (
     }
   }
 
-  const result = await Form.findById(id);
+  const result = await Form.findById({ _id: id });
 
   return result;
 };
@@ -143,7 +143,7 @@ const updateForm = async (
 
 // Delete Form
 const deleteForm = async (id: string): Promise<IForm | null> => {
-  const result = await Form.findByIdAndDelete(id);
+  const result = await Form.findByIdAndDelete({ _id: id });
   if (!result) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Form Not Found');
   }

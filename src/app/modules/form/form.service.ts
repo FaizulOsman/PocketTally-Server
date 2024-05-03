@@ -111,7 +111,7 @@ const getSingleForm = async (
 ): Promise<IForm | null> => {
   if (verifiedUser?.role !== 'admin') {
     const form = await Form.findById(id);
-    console.log(form);
+
     if (form?.email !== verifiedUser?.email) {
       throw new ApiError(
         httpStatus.NOT_FOUND,

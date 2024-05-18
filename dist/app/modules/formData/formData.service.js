@@ -81,7 +81,7 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
 });
 // Get Single
 const getSingleData = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, function* () {
-    // const formData = await FormData.findById(id);
+    // const formData = await FormData.findById({ _id: id });
     // console.log(formData);
     // if (formData?.userEmail !== verifiedUser?.email) {
     //   throw new ApiError(
@@ -89,7 +89,7 @@ const getSingleData = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, fu
     //     'You are not authorized to access this!'
     //   );
     // }
-    const result = yield formData_model_1.FormData.findById(id);
+    const result = yield formData_model_1.FormData.findById({ _id: id });
     return result;
 });
 const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -104,7 +104,7 @@ const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* 
 });
 // Delete Single
 const deleteData = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield formData_model_1.FormData.findByIdAndDelete(id);
+    const result = yield formData_model_1.FormData.findByIdAndDelete({ _id: id });
     if (!result) {
         throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Data Not Found');
     }

@@ -97,13 +97,12 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
 // Get Single Form
 const getSingleForm = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, function* () {
     if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) !== 'admin') {
-        const form = yield form_model_1.Form.findById(id);
-        console.log(form);
+        const form = yield form_model_1.Form.findById({ _id: id });
         if ((form === null || form === void 0 ? void 0 : form.email) !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email)) {
             throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to access this!');
         }
     }
-    const result = yield form_model_1.Form.findById(id);
+    const result = yield form_model_1.Form.findById({ _id: id });
     return result;
 });
 const updateForm = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -118,7 +117,7 @@ const updateForm = (id, payload) => __awaiter(void 0, void 0, void 0, function* 
 });
 // Delete Form
 const deleteForm = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield form_model_1.Form.findByIdAndDelete(id);
+    const result = yield form_model_1.Form.findByIdAndDelete({ _id: id });
     if (!result) {
         throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Form Not Found');
     }

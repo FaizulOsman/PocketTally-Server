@@ -12,6 +12,7 @@ const createFormZodValidation = z.object({
         required: z.boolean(),
       })
     ),
+    moreOptions: z.boolean(),
   }),
 });
 
@@ -19,14 +20,17 @@ const updateFormZodValidation = z.object({
   body: z.object({
     email: z.string().optional(),
     formName: z.string().optional(),
-    formData: z.array(
-      z.object({
-        type: z.string().optional(),
-        placeholder: z.string().optional(),
-        name: z.string().optional(),
-        required: z.boolean().optional(),
-      })
-    ),
+    formData: z
+      .array(
+        z.object({
+          type: z.string().optional(),
+          placeholder: z.string().optional(),
+          name: z.string().optional(),
+          required: z.boolean().optional(),
+        })
+      )
+      .optional(),
+    moreOptions: z.boolean().optional(),
   }),
 });
 

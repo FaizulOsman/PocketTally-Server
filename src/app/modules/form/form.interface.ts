@@ -11,6 +11,7 @@ export type IForm = {
   email: string;
   formName: string;
   formData: IFormData[];
+  moreOptions: boolean;
 };
 
 // Form Model

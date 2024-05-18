@@ -35,6 +35,10 @@ const FormSchema = new Schema<IForm>(
       ],
       required: true,
     },
+    moreOptions: {
+      type: Boolean,
+      required: false,
+    },
   },
   {
     timestamps: true,

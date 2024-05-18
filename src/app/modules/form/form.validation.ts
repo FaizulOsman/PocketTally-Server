@@ -12,7 +12,7 @@ const createFormZodValidation = z.object({
         required: z.boolean(),
       })
     ),
-    moreOptions: z.boolean(),
+    moreOptions: z.boolean().optional(),
   }),
 });
 

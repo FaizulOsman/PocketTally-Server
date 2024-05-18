@@ -35,6 +35,10 @@ const FormSchema = new mongoose_1.Schema({
         ],
         required: true,
     },
+    moreOptions: {
+        type: Boolean,
+        required: false,
+    },
 }, {
     timestamps: true,
     toJSON: {

@@ -12,7 +12,7 @@ const createFormZodValidation = zod_1.z.object({
             name: zod_1.z.string(),
             required: zod_1.z.boolean(),
         })),
-        moreOptions: zod_1.z.boolean(),
+        moreOptions: zod_1.z.boolean().optional(),
     }),
 });
 const updateFormZodValidation = zod_1.z.object({

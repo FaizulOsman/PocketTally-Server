@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import { SortOrder } from 'mongoose';
@@ -10,7 +11,7 @@ import { IGenericResponse } from '../../../interfaces/common';
 // import { User } from '../user/user.model';
 import ApiError from '../../../errors/apiError';
 import { paginationHelper } from '../../../helper/paginationHelper';
-import vCardJS from 'vcards-js';
+const vCardJS = require('vcards-js');
 
 // Create VCard
 const createVCard = async (

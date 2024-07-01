@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 const sendOtpMail = (email, otp) => {
-  let transpoter = nodemailer.createTransport({
+  let transporter = nodemailer.createTransport({
     service: 'Gmail',
     port: 587,
     secure: false,
@@ -26,7 +26,7 @@ const sendOtpMail = (email, otp) => {
     </div>`,
   };
 
-  transpoter.sendMail(mailOption, async (error, info) => {
+  transporter.sendMail(mailOption, async (error, info) => {
     if (error) {
       console.log('hello Error', error);
     } else {

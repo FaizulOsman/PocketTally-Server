@@ -10,6 +10,18 @@ import {
 } from './auth.interface';
 import config from '../../../config';
 
+const sendOTP: RequestHandler = catchAsync(async (req, res) => {
+  const { ...userData } = req.body;
+
+  await AuthService.sendOTP(userData);
+
+  sendResponse<IUserSignupResponse>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'OTP sent successfully',
+  });
+});
+
 const createUser: RequestHandler = catchAsync(async (req, res) => {
   const { ...userData } = req.body;
 
@@ -77,6 +89,7 @@ const refreshToken: RequestHandler = catchAsync(async (req, res) => {
 });
 
 export const AuthController = {
+  sendOTP,
   createUser,
   login,
   refreshToken,

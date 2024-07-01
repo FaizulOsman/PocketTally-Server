@@ -12,6 +12,34 @@ import { jwtHelpers } from '../../../helper/jwtHelpers';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 
+const sendOTP = async (payload: IUser): Promise<IUserSignupResponse> => {
+  const result = await User.create(payload);
+  let accessToken;
+  let refreshToken;
+  if (result) {
+    accessToken = jwtHelpers.createToken(
+      {
+        id: result._id,
+        role: result.role,
+        email: payload.email,
+      },
+      config.jwt.secret as Secret,
+      config.jwt.expires_in as string
+    );
+
+    refreshToken = jwtHelpers.createToken(
+      {
+        id: result._id,
+        role: result.role,
+        email: payload.email,
+      },
+      config.jwt.refresh_secret as Secret,
+      config.jwt.refresh_expires_in as string
+    );
+  }
+  return { result, refreshToken, accessToken };
+};
+
 const createUser = async (payload: IUser): Promise<IUserSignupResponse> => {
   const result = await User.create(payload);
   let accessToken;
@@ -119,6 +147,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
 };
 
 export const AuthService = {
+  sendOTP,
   createUser,
   login,
   refreshToken,

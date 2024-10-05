@@ -112,6 +112,45 @@ const login = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   };
 };
 
+const googleLogin = async (
+  payload: IUserLogin
+): Promise<IUserLoginResponse> => {
+  const user = new User();
+  const isUserExist = await user.isUserExist(payload.email);
+
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const accessToken = jwtHelpers.createToken(
+    {
+      id: isUserExist._id,
+      role: isUserExist.role,
+      email: payload.email,
+    },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string
+  );
+
+  const refreshToken = jwtHelpers.createToken(
+    {
+      id: isUserExist._id,
+      role: isUserExist.role,
+      email: payload.email,
+    },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string
+  );
+
+  const userData = await User.findOne({ _id: isUserExist._id });
+
+  return {
+    userData,
+    accessToken,
+    refreshToken,
+  };
+};
+
 const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
   let verifiedToken = null;
   try {
@@ -150,5 +189,6 @@ export const AuthService = {
   sendOTP,
   createUser,
   login,
+  googleLogin,
   refreshToken,
 };

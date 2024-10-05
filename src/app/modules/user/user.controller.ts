@@ -33,7 +33,7 @@ const getSingleUser: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IUser>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'user retrived successfully',
+    message: 'User Retrived successfully',
     data: result,
   });
 });

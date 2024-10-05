@@ -8,6 +8,10 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema<IUser, UserModel>(
   {
+    username: {
+      type: String,
+      required: true,
+    },
     password: {
       type: String,
       required: true,

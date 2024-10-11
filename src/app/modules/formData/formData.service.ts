@@ -10,6 +10,7 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { User } from '../user/user.model';
 import ApiError from '../../../errors/apiError';
 import { paginationHelper } from '../../../helper/paginationHelper';
+import { Form } from '../form/form.model';
 
 // Create
 const createData = async (
@@ -20,6 +21,24 @@ const createData = async (
   if (user.length === 0) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
+
+  const form = await Form.findOne({ _id: payload?.formId });
+
+  if (!form || !form?.formData) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
+  }
+
+  const parsedData = JSON.parse(payload?.data);
+
+  // Validate required fields
+  form.formData.forEach((field: any) => {
+    if (field.required && !(field.name in parsedData)) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        `Missing required field: ${field.name}`
+      );
+    }
+  });
 
   const result = await FormData.create(payload);
   return result;

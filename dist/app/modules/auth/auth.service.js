@@ -18,6 +18,24 @@ const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const user_model_1 = require("../user/user.model");
 const jwtHelpers_1 = require("../../../helper/jwtHelpers");
 const config_1 = __importDefault(require("../../../config"));
+const sendOTP = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_model_1.User.create(payload);
+    let accessToken;
+    let refreshToken;
+    if (result) {
+        accessToken = jwtHelpers_1.jwtHelpers.createToken({
+            id: result._id,
+            role: result.role,
+            email: payload.email,
+        }, config_1.default.jwt.secret, config_1.default.jwt.expires_in);
+        refreshToken = jwtHelpers_1.jwtHelpers.createToken({
+            id: result._id,
+            role: result.role,
+            email: payload.email,
+        }, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_expires_in);
+    }
+    return { result, refreshToken, accessToken };
+});
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.User.create(payload);
     let accessToken;
@@ -63,6 +81,29 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         refreshToken,
     };
 });
+const googleLogin = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = new user_model_1.User();
+    const isUserExist = yield user.isUserExist(payload.email);
+    if (!isUserExist) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
+    }
+    const accessToken = jwtHelpers_1.jwtHelpers.createToken({
+        id: isUserExist._id,
+        role: isUserExist.role,
+        email: payload.email,
+    }, config_1.default.jwt.secret, config_1.default.jwt.expires_in);
+    const refreshToken = jwtHelpers_1.jwtHelpers.createToken({
+        id: isUserExist._id,
+        role: isUserExist.role,
+        email: payload.email,
+    }, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_expires_in);
+    const userData = yield user_model_1.User.findOne({ _id: isUserExist._id });
+    return {
+        userData,
+        accessToken,
+        refreshToken,
+    };
+});
 const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     let verifiedToken = null;
     try {
@@ -86,7 +127,9 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.AuthService = {
+    sendOTP,
     createUser,
     login,
+    googleLogin,
     refreshToken,
 };

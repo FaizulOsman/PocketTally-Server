@@ -5,6 +5,7 @@ const zod_1 = require("zod");
 const updateUserZodSchema = zod_1.z.object({
     body: zod_1.z.object({
         email: zod_1.z.string().optional(),
+        username: zod_1.z.string().optional(),
         password: zod_1.z.string().optional(),
         role: zod_1.z.enum(['user', 'admin', 'super_admin']).optional(),
         name: zod_1.z.string().optional(),

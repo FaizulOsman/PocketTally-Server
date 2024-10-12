@@ -20,6 +20,10 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = __importDefault(require("../../../config"));
 const { Schema } = mongoose_1.default;
 const userSchema = new Schema({
+    username: {
+        type: String,
+        required: true,
+    },
     password: {
         type: String,
         required: true,

@@ -15,15 +15,15 @@ import { jwtHelpers } from '../../../helper/jwtHelpers';
 // Create VCard
 const createVCard: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    const token: any = req.headers.authorization;
-    const verifiedUser = jwtHelpers.verifyToken(
-      token,
-      config.jwt.secret as Secret
-    );
+    // const token: any = req.headers.authorization;
+    // const verifiedUser = jwtHelpers.verifyToken(
+    //   token,
+    //   config.jwt.secret as Secret
+    // );
 
-    const { ...vCardeData } = req.body;
+    const { ...vCardData } = req.body;
 
-    const result = await VCardService.createVCard(vCardeData, verifiedUser);
+    const result = await VCardService.createVCard(vCardData);
 
     // Send Response
     sendResponse<IVCard>(res, {

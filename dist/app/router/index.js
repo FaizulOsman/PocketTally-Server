@@ -8,6 +8,7 @@ const auth_router_1 = require("../modules/auth/auth.router");
 const user_router_1 = require("../modules/user/user.router");
 const form_route_1 = require("../modules/form/form.route");
 const formData_route_1 = require("../modules/formData/formData.route");
+const vCard_route_1 = require("../modules/vCard/vCard.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -25,6 +26,10 @@ const moduleRoutes = [
     {
         path: '/formData',
         route: formData_route_1.FormDataRoutes,
+    },
+    {
+        path: '/vCard',
+        route: vCard_route_1.VCardRoutes,
     },
 ];
 moduleRoutes === null || moduleRoutes === void 0 ? void 0 : moduleRoutes.forEach(route => router.use(route === null || route === void 0 ? void 0 : route.path, route === null || route === void 0 ? void 0 : route.route));

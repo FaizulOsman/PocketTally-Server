@@ -30,12 +30,24 @@ const formData_constants_1 = require("./formData.constants");
 const user_model_1 = require("../user/user.model");
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const paginationHelper_1 = require("../../../helper/paginationHelper");
+const form_model_1 = require("../form/form.model");
 // Create
 const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.find({ _id: verifiedUser.id });
     if (user.length === 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
     }
+    const form = yield form_model_1.Form.findOne({ _id: payload === null || payload === void 0 ? void 0 : payload.formId });
+    if (!form || !(form === null || form === void 0 ? void 0 : form.formData)) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Form not found');
+    }
+    const parsedData = JSON.parse(payload === null || payload === void 0 ? void 0 : payload.data);
+    // Validate required fields
+    form.formData.forEach((field) => {
+        if (field.required && !(field.name in parsedData)) {
+            throw new apiError_1.default(http_status_1.default.BAD_REQUEST, `Missing required field: ${field.name}`);
+        }
+    });
     const result = yield formData_model_1.FormData.create(payload);
     return result;
 });

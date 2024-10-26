@@ -69,7 +69,7 @@ const login: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IUserLoginResponse>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'user logged in successfully',
+    message: 'Logged in successfully',
     data: accessToken,
   });
 });

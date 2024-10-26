@@ -145,6 +145,13 @@ const updateMyProfile = async (
   return result;
 };
 
+const getValidateEmail = async (email: string) => {
+  const result = await User.findOne({ email });
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+};
+
 export const UserService = {
   getAllUsers,
   getSingleUser,
@@ -152,4 +159,5 @@ export const UserService = {
   deleteUser,
   getMyProfile,
   updateMyProfile,
+  getValidateEmail,
 };

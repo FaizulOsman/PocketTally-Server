@@ -8,40 +8,20 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema<IUser, UserModel>(
   {
-    username: {
-      type: String,
-      required: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      select: 0,
-    },
-    role: {
-      type: String,
-      enum: role,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    address: {
-      type: String,
-      required: false,
-    },
-    imageUrl: {
-      type: String,
-      required: false,
-    },
+    username: { type: String, required: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    password: { type: String, required: true, select: 0 },
+    role: { type: String, enum: role },
+    address: { type: String },
+    imageUrl: { type: String },
+    dob: { type: String },
+    pincode: { type: Number },
+    gender: { type: String },
+    city: { type: String },
+    state: { type: String },
+    country: { type: String },
   },
   {
     timestamps: true,

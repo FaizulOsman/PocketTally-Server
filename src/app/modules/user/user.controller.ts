@@ -94,6 +94,18 @@ const updateMyProfile: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  await UserService.getValidateEmail(email);
+
+  sendResponse<IUser>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User Retrieved successfully',
+  });
+});
+
 export const UserController = {
   getAllUser,
   getSingleUser,
@@ -101,4 +113,5 @@ export const UserController = {
   deleteUser,
   getMyProfile,
   updateMyProfile,
+  getValidateEmail,
 };

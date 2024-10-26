@@ -4,13 +4,19 @@ import { Model } from 'mongoose';
 export type IUser = {
   _id: string;
   username: string;
-  password: string;
-  role: 'user' | 'admin' | 'super_admin';
   name: string;
   email: string;
   phone: string;
+  password: string;
+  role: 'user' | 'admin' | 'super_admin';
   address?: string;
   imageUrl?: string;
+  dob?: string;
+  pincode?: string;
+  gender?: string;
+  city?: string;
+  state?: string;
+  country?: string;
 };
 
 export type IUserMethods = {

@@ -19,6 +19,8 @@ router.patch(
   UserController.updateMyProfile
 );
 
+router.get('/get-validate-email', UserController.getValidateEmail);
+
 router.get(
   '/:id',
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),

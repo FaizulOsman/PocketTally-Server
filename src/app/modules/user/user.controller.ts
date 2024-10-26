@@ -108,7 +108,7 @@ const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IUser>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'User Retrieved successfully',
+    message: 'Email found successfully',
   });
 });
 

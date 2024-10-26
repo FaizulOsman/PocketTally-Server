@@ -145,7 +145,7 @@ const updateMyProfile = async (
   return result;
 };
 
-const getValidateEmail = async (email: string) => {
+const getValidateEmail = async (email: string | undefined) => {
   const result = await User.findOne({ email });
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');

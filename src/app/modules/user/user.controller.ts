@@ -11,6 +11,7 @@ import { paginationFields } from '../../../constants/pagination';
 import { jwtHelpers } from '../../../helper/jwtHelpers';
 import config from '../../../config';
 import { Secret } from 'jsonwebtoken';
+import ApiError from '../../../errors/apiError';
 
 const getAllUser: RequestHandler = catchAsync(async (req, res) => {
   const filters = pick(req.query, UserFilterableFields);
@@ -95,7 +96,12 @@ const updateMyProfile: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
-  const { email } = req.body;
+  const { email } = req.query;
+
+  // Type check to ensure `email` is a string
+  if (typeof email !== 'string') {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid email format');
+  }
 
   await UserService.getValidateEmail(email);
 

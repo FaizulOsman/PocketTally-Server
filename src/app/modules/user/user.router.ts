@@ -19,7 +19,7 @@ router.patch(
   UserController.updateMyProfile
 );
 
-router.get('/get-validate-email', UserController.getValidateEmail);
+router.get('/validate_email', UserController.getValidateEmail);
 
 router.get(
   '/:id',

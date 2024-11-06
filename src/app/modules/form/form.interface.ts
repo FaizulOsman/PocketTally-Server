@@ -5,6 +5,7 @@ export type IFormData = {
   placeholder: string;
   name: string;
   required: boolean;
+  relation: string;
 };
 
 export type IForm = {

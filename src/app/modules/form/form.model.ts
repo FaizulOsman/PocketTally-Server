@@ -31,6 +31,9 @@ const FormSchema = new Schema<IForm>(
             type: Boolean,
             required: true,
           },
+          relation: {
+            type: String,
+          },
         },
       ],
       required: true,

@@ -29,6 +29,7 @@ const createData = async (
   }
 
   const parsedData = JSON.parse(payload?.data);
+  const relationFields = form?.formData?.filter(f => f?.relation);
 
   // Validate required fields
   form.formData.forEach((field: any) => {
@@ -40,6 +41,40 @@ const createData = async (
     }
   });
 
+  // Process relations
+  relationFields?.forEach(field => {
+    const [field1, operator, field2] = field.relation.split(/([-+*/])/); // Split "Sales-Cost" into ["Sales", "-", "Cost"]
+    const value1 = parsedData[field1.trim()];
+    const value2 = parsedData[field2.trim()];
+
+    // Perform the operation
+    if (value1 !== undefined && value2 !== undefined) {
+      switch (operator) {
+        case '+':
+          parsedData[field.name] = value1 + value2;
+          break;
+        case '-':
+          parsedData[field.name] = value1 - value2;
+          break;
+        case '*':
+          parsedData[field.name] = value1 * value2;
+          break;
+        case '/':
+          parsedData[field.name] = value2 !== 0 ? value1 / value2 : null; // Prevent division by zero
+          break;
+        default:
+          throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            `Invalid relation operator: ${operator}`
+          );
+      }
+    }
+  });
+
+  // Update payload data
+  payload.data = JSON.stringify(parsedData);
+
+  // Create new data entry
   const result = await FormData.create(payload);
   return result;
 };

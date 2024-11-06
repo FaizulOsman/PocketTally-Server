@@ -29,7 +29,7 @@ const createForm: RequestHandler = catchAsync(
     sendResponse<IForm>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Form Created Successfully',
+      message: 'Tally Created Successfully',
       data: result,
     });
   }
@@ -57,7 +57,7 @@ const getAllForms: RequestHandler = catchAsync(
     sendResponse<IForm[]>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Forms retrieved Successfully',
+      message: 'Tally retrieved Successfully',
       meta: result.meta,
       data: result.data,
     });
@@ -80,7 +80,7 @@ const getSingleForm: RequestHandler = catchAsync(
     sendResponse<IForm>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Get Single Form Successfully',
+      message: 'Get Single Tally Successfully',
       data: result,
     });
   }
@@ -96,7 +96,7 @@ const updateForm: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IForm>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Form updated successfully',
+    message: 'Tally updated successfully',
     data: result,
   });
 });
@@ -110,7 +110,7 @@ const deleteForm: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IForm>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Form deleted successfully',
+    message: 'Tally deleted successfully',
     data: result,
   });
 });

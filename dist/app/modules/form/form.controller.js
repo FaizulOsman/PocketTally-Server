@@ -43,7 +43,7 @@ const createForm = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Form Created Successfully',
+        message: 'Tally Created Successfully',
         data: result,
     });
 }));
@@ -58,7 +58,7 @@ const getAllForms = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Forms retrieved Successfully',
+        message: 'Tally retrieved Successfully',
         meta: result.meta,
         data: result.data,
     });
@@ -73,7 +73,7 @@ const getSingleForm = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Get Single Form Successfully',
+        message: 'Get Single Tally Successfully',
         data: result,
     });
 }));
@@ -85,7 +85,7 @@ const updateForm = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Form updated successfully',
+        message: 'Tally updated successfully',
         data: result,
     });
 }));
@@ -96,7 +96,7 @@ const deleteForm = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Form deleted successfully',
+        message: 'Tally deleted successfully',
         data: result,
     });
 }));

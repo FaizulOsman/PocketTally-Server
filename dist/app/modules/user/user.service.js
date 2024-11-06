@@ -124,6 +124,12 @@ const updateMyProfile = (user, payload) => __awaiter(void 0, void 0, void 0, fun
     });
     return result;
 });
+const getValidateEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_model_1.User.findOne({ email });
+    if (!result) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
+    }
+});
 exports.UserService = {
     getAllUsers,
     getSingleUser,
@@ -131,4 +137,5 @@ exports.UserService = {
     deleteUser,
     getMyProfile,
     updateMyProfile,
+    getValidateEmail,
 };

@@ -33,6 +33,7 @@ const user_constants_1 = require("./user.constants");
 const pagination_1 = require("../../../constants/pagination");
 const jwtHelpers_1 = require("../../../helper/jwtHelpers");
 const config_1 = __importDefault(require("../../../config"));
+const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const getAllUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, user_constants_1.UserFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
@@ -98,6 +99,19 @@ const updateMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const getValidateEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.query;
+    // Type check to ensure `email` is a string
+    if (typeof email !== 'string') {
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid email format');
+    }
+    yield user_service_1.UserService.getValidateEmail(email);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Email found successfully',
+    });
+}));
 exports.UserController = {
     getAllUser,
     getSingleUser,
@@ -105,4 +119,5 @@ exports.UserController = {
     deleteUser,
     getMyProfile,
     updateMyProfile,
+    getValidateEmail,
 };

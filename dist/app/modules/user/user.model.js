@@ -20,40 +20,20 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = __importDefault(require("../../../config"));
 const { Schema } = mongoose_1.default;
 const userSchema = new Schema({
-    username: {
-        type: String,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-        select: 0,
-    },
-    role: {
-        type: String,
-        enum: user_constants_1.role,
-    },
-    name: {
-        type: String,
-        required: true,
-    },
-    phone: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    address: {
-        type: String,
-        required: false,
-    },
-    imageUrl: {
-        type: String,
-        required: false,
-    },
+    username: { type: String, required: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    password: { type: String, required: true, select: 0 },
+    role: { type: String, enum: user_constants_1.role },
+    address: { type: String },
+    imageUrl: { type: String },
+    dob: { type: String },
+    pincode: { type: Number },
+    gender: { type: String },
+    city: { type: String },
+    state: { type: String },
+    country: { type: String },
 }, {
     timestamps: true,
     toJSON: {

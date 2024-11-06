@@ -31,6 +31,9 @@ const FormSchema = new mongoose_1.Schema({
                     type: Boolean,
                     required: true,
                 },
+                relation: {
+                    type: String,
+                },
             },
         ],
         required: true,

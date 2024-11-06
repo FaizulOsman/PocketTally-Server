@@ -33,6 +33,7 @@ const paginationHelper_1 = require("../../../helper/paginationHelper");
 const form_model_1 = require("../form/form.model");
 // Create
 const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const user = yield user_model_1.User.find({ _id: verifiedUser.id });
     if (user.length === 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
@@ -42,12 +43,41 @@ const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Form not found');
     }
     const parsedData = JSON.parse(payload === null || payload === void 0 ? void 0 : payload.data);
+    const relationFields = (_a = form === null || form === void 0 ? void 0 : form.formData) === null || _a === void 0 ? void 0 : _a.filter(f => f === null || f === void 0 ? void 0 : f.relation);
     // Validate required fields
     form.formData.forEach((field) => {
         if (field.required && !(field.name in parsedData)) {
             throw new apiError_1.default(http_status_1.default.BAD_REQUEST, `Missing required field: ${field.name}`);
         }
     });
+    // Process relations
+    relationFields === null || relationFields === void 0 ? void 0 : relationFields.forEach(field => {
+        const [field1, operator, field2] = field.relation.split(/([-+*/])/); // Split "Sales-Cost" into ["Sales", "-", "Cost"]
+        const value1 = parsedData[field1.trim()];
+        const value2 = parsedData[field2.trim()];
+        // Perform the operation
+        if (value1 !== undefined && value2 !== undefined) {
+            switch (operator) {
+                case '+':
+                    parsedData[field.name] = value1 + value2;
+                    break;
+                case '-':
+                    parsedData[field.name] = value1 - value2;
+                    break;
+                case '*':
+                    parsedData[field.name] = value1 * value2;
+                    break;
+                case '/':
+                    parsedData[field.name] = value2 !== 0 ? value1 / value2 : null; // Prevent division by zero
+                    break;
+                default:
+                    throw new apiError_1.default(http_status_1.default.BAD_REQUEST, `Invalid relation operator: ${operator}`);
+            }
+        }
+    });
+    // Update payload data
+    payload.data = JSON.stringify(parsedData);
+    // Create new data entry
     const result = yield formData_model_1.FormData.create(payload);
     return result;
 });

@@ -12,4 +12,5 @@ export type IFormDataFilters = {
   searchTerm?: string;
   data?: string;
   formId?: string;
+  dateRange?: string;
 };

@@ -24,7 +24,6 @@ const createForm = async (
   const isExist = await Form.find({
     $and: [{ email: payload?.email }, { formName: payload?.formName }],
   });
-  console.log('Already Exist: ', isExist);
   if (isExist.length > 0) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
@@ -42,11 +41,11 @@ const getAllForms = async (
   paginationOptions: IPaginationOptions,
   verifiedUser: any
 ): Promise<IGenericResponse<IForm[]>> => {
-  // Try not to use any
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, dateRange, ...filtersData } = filters;
 
-  const andConditions = []; // Try not to use any
+  const andConditions: Record<string, any>[] = [];
 
+  // Add search term filtering
   if (searchTerm) {
     andConditions?.push({
       $or: formSearchableFields?.map(field => ({
@@ -58,22 +57,39 @@ const getAllForms = async (
     });
   }
 
+  // Add filters data conditions
   if (Object.keys(filtersData).length) {
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => {
-        return { [field]: value };
-      }),
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
     });
+  }
+
+  // Add date range filter if available and valid
+  if (dateRange) {
+    const [startDate, endDate] = dateRange
+      .split('-')
+      .map(date => new Date(date.trim()));
+
+    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      andConditions.push({
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+    }
   }
 
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
-  const sortCondition: '' | { [key: string]: SortOrder } = sortBy &&
-    sortOrder && { [sortBy]: sortOrder };
+  const sortCondition: { [key: string]: SortOrder } | '' =
+    sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
 
   const whereCondition =
-    andConditions?.length > 0 ? { $and: andConditions } : {};
+    andConditions.length > 0 ? { $and: andConditions } : {};
 
   const result = await Form.find(
     verifiedUser?.role === 'admin'

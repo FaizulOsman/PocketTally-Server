@@ -22,4 +22,5 @@ export type IFormFilters = {
   searchTerm?: string;
   email?: string;
   formName?: string;
+  dateRange?: string;
 };

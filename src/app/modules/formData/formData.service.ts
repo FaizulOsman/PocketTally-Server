@@ -85,9 +85,9 @@ const getAllData = async (
   paginationOptions: IPaginationOptions
 ): Promise<IGenericResponse<IFormData[]>> => {
   // Try not to use any
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, dateRange, ...filtersData } = filters;
 
-  const andConditions = []; // Try not to use any
+  const andConditions: Record<string, any>[] = [];
 
   if (searchTerm) {
     andConditions?.push({
@@ -102,20 +102,36 @@ const getAllData = async (
 
   if (Object.keys(filtersData).length) {
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => {
-        return { [field]: value };
-      }),
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
     });
+  }
+
+  // Add date range filter if available and valid
+  if (dateRange) {
+    const [startDate, endDate] = dateRange
+      .split('-')
+      .map(date => new Date(date.trim()));
+
+    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      andConditions.push({
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+    }
   }
 
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
-  const sortCondition: '' | { [key: string]: SortOrder } = sortBy &&
-    sortOrder && { [sortBy]: sortOrder };
+  const sortCondition: { [key: string]: SortOrder } | '' =
+    sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
 
   const whereCondition =
-    andConditions?.length > 0 ? { $and: andConditions } : {};
+    andConditions.length > 0 ? { $and: andConditions } : {};
 
   const result = await FormData.find(whereCondition)
     .sort(sortCondition)

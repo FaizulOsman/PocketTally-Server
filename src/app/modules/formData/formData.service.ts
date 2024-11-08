@@ -173,10 +173,51 @@ const updateData = async (
   id: string,
   payload: Partial<IFormData>
 ): Promise<IFormData | null> => {
-  const isExist = await FormData.findOne({ _id: id });
-  if (!isExist) {
+  const existingData = await FormData.findOne({ _id: id });
+  if (!existingData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Form not found');
   }
+
+  const form = await Form.findOne({ _id: existingData.formId });
+  if (!form || !form.formData) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
+  }
+
+  const existingParsedData = JSON.parse(existingData.data);
+  const updatedParsedData = JSON.parse(payload.data || '{}');
+
+  const fullData = { ...existingParsedData, ...updatedParsedData };
+
+  const relationFields = form.formData.filter(f => f.relation);
+  relationFields.forEach(field => {
+    const [field1, operator, field2] = field.relation.split(/([-+*/])/);
+    const value1 = fullData[field1.trim()];
+    const value2 = fullData[field2.trim()];
+
+    if (value1 !== undefined && value2 !== undefined) {
+      switch (operator) {
+        case '+':
+          fullData[field.name] = value1 + value2;
+          break;
+        case '-':
+          fullData[field.name] = value1 - value2;
+          break;
+        case '*':
+          fullData[field.name] = value1 * value2;
+          break;
+        case '/':
+          fullData[field.name] = value2 !== 0 ? value1 / value2 : null;
+          break;
+        default:
+          throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            `Invalid relation operator: ${operator}`
+          );
+      }
+    }
+  });
+
+  payload.data = JSON.stringify(fullData);
 
   const result = await FormData.findOneAndUpdate({ _id: id }, payload, {
     new: true,

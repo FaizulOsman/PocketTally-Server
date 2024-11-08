@@ -22,6 +22,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send({ message: '🔥 Application is successfully running 🔥' });
 });
 
+app.get('/run', (req, res) => {
+  // const data = Script();
+  res.status(200).json({ message: 'Success' });
+});
+
 // global error handler
 app.use(globalErrorHandler);
 

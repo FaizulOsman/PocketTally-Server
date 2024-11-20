@@ -84,7 +84,6 @@ const getAllData = async (
   filters: IFormDataFilters,
   paginationOptions: IPaginationOptions
 ): Promise<IGenericResponse<IFormData[]>> => {
-  // Try not to use any
   const { searchTerm, dateRange, ...filtersData } = filters;
 
   const andConditions: Record<string, any>[] = [];
@@ -133,12 +132,37 @@ const getAllData = async (
   const whereCondition =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  const result = await FormData.find(whereCondition)
+  let result = await FormData.find(whereCondition)
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
 
   const total = await FormData.countDocuments(whereCondition);
+
+  // Dynamically sort based on keys in the "data" property
+  const parsedSortKey = sortBy?.startsWith('data.')
+    ? sortBy.replace('data.', '')
+    : null;
+
+  if (parsedSortKey) {
+    result = result.sort((a, b) => {
+      const dataA = JSON.parse(a.data);
+      const dataB = JSON.parse(b.data);
+
+      const valueA = dataA[parsedSortKey];
+      const valueB = dataB[parsedSortKey];
+
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return Number(sortOrder) === 1 ? valueA - valueB : valueB - valueA;
+      } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return Number(sortOrder) === 1
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      return 0;
+    });
+  }
 
   return {
     meta: {

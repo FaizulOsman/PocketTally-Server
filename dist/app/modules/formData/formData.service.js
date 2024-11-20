@@ -84,8 +84,8 @@ const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
 // Get All
 const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
-    const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
-    const andConditions = []; // Try not to use any
+    const { searchTerm, dateRange } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange"]);
+    const andConditions = [];
     if (searchTerm) {
         andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
             $or: formData_constants_1.formDataSearchableFields === null || formData_constants_1.formDataSearchableFields === void 0 ? void 0 : formData_constants_1.formDataSearchableFields.map(field => ({
@@ -98,15 +98,28 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
     }
     if (Object.keys(filtersData).length) {
         andConditions.push({
-            $and: Object.entries(filtersData).map(([field, value]) => {
-                return { [field]: value };
-            }),
+            $and: Object.entries(filtersData).map(([field, value]) => ({
+                [field]: value,
+            })),
         });
     }
+    // Add date range filter if available and valid
+    if (dateRange) {
+        const [startDate, endDate] = dateRange
+            .split('-')
+            .map(date => new Date(date.trim()));
+        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            andConditions.push({
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            });
+        }
+    }
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
-    const sortCondition = sortBy &&
-        sortOrder && { [sortBy]: sortOrder };
-    const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
+    const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
+    const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
     const result = yield formData_model_1.FormData.find(whereCondition)
         .sort(sortCondition)
         .skip(skip)
@@ -135,10 +148,42 @@ const getSingleData = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, fu
     return result;
 });
 const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield formData_model_1.FormData.findOne({ _id: id });
-    if (!isExist) {
+    const existingData = yield formData_model_1.FormData.findOne({ _id: id });
+    if (!existingData) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Form not found');
     }
+    const form = yield form_model_1.Form.findOne({ _id: existingData.formId });
+    if (!form || !form.formData) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Form not found');
+    }
+    const existingParsedData = JSON.parse(existingData.data);
+    const updatedParsedData = JSON.parse(payload.data || '{}');
+    const fullData = Object.assign(Object.assign({}, existingParsedData), updatedParsedData);
+    const relationFields = form.formData.filter(f => f.relation);
+    relationFields.forEach(field => {
+        const [field1, operator, field2] = field.relation.split(/([-+*/])/);
+        const value1 = fullData[field1.trim()];
+        const value2 = fullData[field2.trim()];
+        if (value1 !== undefined && value2 !== undefined) {
+            switch (operator) {
+                case '+':
+                    fullData[field.name] = value1 + value2;
+                    break;
+                case '-':
+                    fullData[field.name] = value1 - value2;
+                    break;
+                case '*':
+                    fullData[field.name] = value1 * value2;
+                    break;
+                case '/':
+                    fullData[field.name] = value2 !== 0 ? value1 / value2 : null;
+                    break;
+                default:
+                    throw new apiError_1.default(http_status_1.default.BAD_REQUEST, `Invalid relation operator: ${operator}`);
+            }
+        }
+    });
+    payload.data = JSON.stringify(fullData);
     const result = yield formData_model_1.FormData.findOneAndUpdate({ _id: id }, payload, {
         new: true,
     });

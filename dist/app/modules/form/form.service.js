@@ -39,7 +39,6 @@ const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     const isExist = yield form_model_1.Form.find({
         $and: [{ email: payload === null || payload === void 0 ? void 0 : payload.email }, { formName: payload === null || payload === void 0 ? void 0 : payload.formName }],
     });
-    console.log('Already Exist: ', isExist);
     if (isExist.length > 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You already have a from with this name.');
     }
@@ -48,9 +47,9 @@ const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
 });
 // Get All Forms (can also filter)
 const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
-    // Try not to use any
-    const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
-    const andConditions = []; // Try not to use any
+    const { searchTerm, dateRange } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange"]);
+    const andConditions = [];
+    // Add search term filtering
     if (searchTerm) {
         andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
             $or: form_constants_1.formSearchableFields === null || form_constants_1.formSearchableFields === void 0 ? void 0 : form_constants_1.formSearchableFields.map(field => ({
@@ -61,17 +60,31 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
             })),
         });
     }
+    // Add filters data conditions
     if (Object.keys(filtersData).length) {
         andConditions.push({
-            $and: Object.entries(filtersData).map(([field, value]) => {
-                return { [field]: value };
-            }),
+            $and: Object.entries(filtersData).map(([field, value]) => ({
+                [field]: value,
+            })),
         });
     }
+    // Add date range filter if available and valid
+    if (dateRange) {
+        const [startDate, endDate] = dateRange
+            .split('-')
+            .map(date => new Date(date.trim()));
+        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            andConditions.push({
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            });
+        }
+    }
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
-    const sortCondition = sortBy &&
-        sortOrder && { [sortBy]: sortOrder };
-    const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
+    const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
+    const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
     const result = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? whereCondition
         : {

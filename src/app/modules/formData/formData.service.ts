@@ -153,9 +153,9 @@ const getAllData = async (
       const valueB = dataB[parsedSortKey];
 
       if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return Number(sortOrder) === 1 ? valueA - valueB : valueB - valueA;
+        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
       } else if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return Number(sortOrder) === 1
+        return sortOrder === 'asc'
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }

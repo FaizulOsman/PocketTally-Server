@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-import { SortOrder } from 'mongoose';
 import { IFormData, IFormDataFilters } from './formData.interface';
 import { FormData } from './formData.model';
 import httpStatus from 'http-status';
@@ -126,43 +125,34 @@ const getAllData = async (
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
-  const sortCondition: { [key: string]: SortOrder } | '' =
-    sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
-
   const whereCondition =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  let result = await FormData.find(whereCondition)
-    .sort(sortCondition)
-    .skip(skip)
-    .limit(limit);
+  let result = await FormData.find(whereCondition);
 
-  const total = await FormData.countDocuments(whereCondition);
+  // Sort by "data" field dynamically if required
+  if (sortBy && sortOrder && sortBy.startsWith('data.')) {
+    const parsedSortKey = sortBy.replace('data.', '');
 
-  // Dynamically sort based on keys in the "data" property
-  const parsedSortKey = sortBy?.startsWith('data.')
-    ? sortBy.replace('data.', '')
-    : null;
-
-  if (parsedSortKey) {
     result = result.sort((a, b) => {
-      const dataA = JSON.parse(a.data);
-      const dataB = JSON.parse(b.data);
+      const dataA = JSON.parse(a.data || '{}');
+      const dataB = JSON.parse(b.data || '{}');
 
-      const valueA = dataA[parsedSortKey];
-      const valueB = dataB[parsedSortKey];
+      const valueA = dataA[parsedSortKey] || 0;
+      const valueB = dataB[parsedSortKey] || 0;
 
-      if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
-      } else if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return sortOrder === 'asc'
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
+      if (sortOrder === 'asc') {
+        return valueA > valueB ? 1 : -1;
+      } else {
+        return valueA < valueB ? 1 : -1;
       }
-
-      return 0;
     });
   }
+
+  // Apply pagination after sorting
+  const paginatedResult = result.slice(skip, skip + limit);
+
+  const total = await FormData.countDocuments(whereCondition);
 
   return {
     meta: {
@@ -170,7 +160,7 @@ const getAllData = async (
       limit,
       total,
     },
-    data: result,
+    data: paginatedResult,
   };
 };
 

@@ -83,7 +83,6 @@ const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
 });
 // Get All
 const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
-    // Try not to use any
     const { searchTerm, dateRange } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange"]);
     const andConditions = [];
     if (searchTerm) {
@@ -118,12 +117,26 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
         }
     }
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
-    const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
     const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
-    const result = yield formData_model_1.FormData.find(whereCondition)
-        .sort(sortCondition)
-        .skip(skip)
-        .limit(limit);
+    let result = yield formData_model_1.FormData.find(whereCondition);
+    // Sort by "data" field dynamically if required
+    if (sortBy && sortOrder && sortBy.startsWith('data.')) {
+        const parsedSortKey = sortBy.replace('data.', '');
+        result = result.sort((a, b) => {
+            const dataA = JSON.parse(a.data || '{}');
+            const dataB = JSON.parse(b.data || '{}');
+            const valueA = dataA[parsedSortKey] || 0;
+            const valueB = dataB[parsedSortKey] || 0;
+            if (sortOrder === 'asc') {
+                return valueA > valueB ? 1 : -1;
+            }
+            else {
+                return valueA < valueB ? 1 : -1;
+            }
+        });
+    }
+    // Apply pagination after sorting
+    const paginatedResult = result.slice(skip, skip + limit);
     const total = yield formData_model_1.FormData.countDocuments(whereCondition);
     return {
         meta: {
@@ -131,7 +144,7 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
             limit,
             total,
         },
-        data: result,
+        data: paginatedResult,
     };
 });
 // Get Single

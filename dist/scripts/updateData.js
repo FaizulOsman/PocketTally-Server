@@ -14,28 +14,21 @@ exports.Script = void 0;
 const formData_model_1 = require("../app/modules/formData/formData.model");
 const Script = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allData = yield formData_model_1.FormData.find({ formId: '65ed2b6b6b18c81b4dd00fee' });
+        const allData = yield formData_model_1.FormData.find({ formId: '65ebd97081bb8921c5d501e9' });
         console.log('Retrieved Data:', allData === null || allData === void 0 ? void 0 : allData.length);
         for (const data of allData) {
-            // Parse the `data` field to modify the `Amount` field
             const parsedData = JSON.parse(data.data);
-            // Convert `Amount` from string to number, if it’s a valid number
-            if (!isNaN(parsedData.Amount)) {
-                parsedData.Amount = Number(parsedData.Amount);
-            }
-            else {
-                console.warn(`Invalid Amount value: ${parsedData.Amount}`);
-                continue; // Skip this document if `Amount` isn't a valid number
-            }
+            console.log(parsedData);
             // Update the document in the database
-            yield formData_model_1.FormData.updateOne({ _id: data._id }, {
-                $set: {
-                    data: JSON.stringify(parsedData), // Save the updated `data` back as a JSON string
-                },
-            });
-            console.log(`Updated Amount for document with _id: ${data._id}`);
+            // await FormData.updateOne(
+            //   { _id: data._id },
+            //   {
+            //     $set: {
+            //       data: JSON.stringify(parsedData), // Save the updated `data` back as a JSON string
+            //     },
+            //   }
+            // );
         }
-        console.log('Amount field updated to number format for all documents.');
     }
     catch (error) {
         console.error('Error updating users:', error);

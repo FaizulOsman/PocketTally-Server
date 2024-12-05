@@ -96,7 +96,7 @@ const getAllNotes = async (
   const whereCondition =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  const result = await Note.find(
+  const query = Note.find(
     verifiedUser?.role === 'admin'
       ? whereCondition
       : {
@@ -106,6 +106,10 @@ const getAllNotes = async (
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
+  if (verifiedUser?.role === 'admin') {
+    query.populate({ path: 'user', select: 'email' });
+  }
+  const result = await query;
 
   const total = await Note.countDocuments(
     verifiedUser?.role === 'admin'

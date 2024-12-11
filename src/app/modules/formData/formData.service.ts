@@ -128,7 +128,7 @@ const getAllData = async (
   const whereCondition =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  let result = await FormData.find(whereCondition);
+  let result = await FormData.find(whereCondition).sort({ createdAt: -1 });
 
   // Sort by "data" field dynamically if required
   if (sortBy && sortOrder && sortBy.startsWith('data.')) {

@@ -38,7 +38,7 @@ const createData = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     if (user.length === 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
     }
-    const form = yield form_model_1.Form.findOne({ _id: payload === null || payload === void 0 ? void 0 : payload.formId });
+    const form = yield form_model_1.Form.findById(payload === null || payload === void 0 ? void 0 : payload.form);
     if (!form || !(form === null || form === void 0 ? void 0 : form.formData)) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Form not found');
     }
@@ -165,7 +165,7 @@ const updateData = (id, payload) => __awaiter(void 0, void 0, void 0, function* 
     if (!existingData) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Form not found');
     }
-    const form = yield form_model_1.Form.findOne({ _id: existingData.formId });
+    const form = yield form_model_1.Form.findById(existingData.form);
     if (!form || !form.formData) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Form not found');
     }
@@ -212,7 +212,7 @@ const deleteData = (id) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // Delete Many
 const deleteMany = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield formData_model_1.FormData.deleteMany({ formId: id });
+    const result = yield formData_model_1.FormData.deleteMany({ form: id });
     if (!result) {
         throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Data Not Found');
     }

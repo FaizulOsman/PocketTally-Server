@@ -4,7 +4,7 @@ exports.formDataSearchableFields = exports.formDataFilterableFields = void 0;
 exports.formDataFilterableFields = [
     'searchTerm',
     'data',
-    'formId',
+    'form',
     'dateRange',
 ];
-exports.formDataSearchableFields = ['searchTerm', 'data', 'formId'];
+exports.formDataSearchableFields = ['searchTerm', 'data', 'form'];

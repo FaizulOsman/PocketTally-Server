@@ -112,6 +112,17 @@ const getValidateEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         message: 'Email found successfully',
     });
 }));
+const dashboardData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const result = yield user_service_1.UserService.dashboardData(verifiedUser);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Dashboard data retrieved successfully',
+        data: result,
+    });
+}));
 exports.UserController = {
     getAllUser,
     getSingleUser,
@@ -120,4 +131,6 @@ exports.UserController = {
     getMyProfile,
     updateMyProfile,
     getValidateEmail,
+    // Dashboard Data
+    dashboardData,
 };

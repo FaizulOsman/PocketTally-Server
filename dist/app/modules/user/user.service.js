@@ -30,6 +30,8 @@ const user_constants_1 = require("./user.constants");
 const http_status_1 = __importDefault(require("http-status"));
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const bcryptHelpers_1 = require("../../../helper/bcryptHelpers");
+const form_model_1 = require("../form/form.model");
+const note_model_1 = require("../note/note.model");
 const getAllUsers = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = [];
@@ -97,24 +99,16 @@ const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 const getMyProfile = (verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.findOne({ email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email });
+    const result = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
     return result;
 });
 const updateMyProfile = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
     const isExist = yield user_model_1.User.findOne({ _id: user === null || user === void 0 ? void 0 : user.id });
     if (!isExist) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'user not found');
     }
-    const { name, password } = payload, userData = __rest(payload, ["name", "password"]);
+    const { password } = payload, userData = __rest(payload, ["password"]);
     const updateUserData = Object.assign({}, userData);
-    // dynamically handling nested fields
-    if (name && ((_b = Object.keys(name)) === null || _b === void 0 ? void 0 : _b.length) > 0) {
-        Object.keys(name).forEach(key => {
-            const nameKey = `name.${key}`;
-            updateUserData[nameKey] = name[key];
-        });
-    }
     // hash the password before updating
     if (password) {
         updateUserData['password'] = yield bcryptHelpers_1.bcryptHelpers.hashPassword(password);
@@ -130,6 +124,28 @@ const getValidateEmail = (email) => __awaiter(void 0, void 0, void 0, function* 
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
 });
+const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const findUser = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
+    if (!findUser) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
+    }
+    const tallyCount = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
+    const noteCount = yield note_model_1.Note.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
+    const result = {
+        tallyCount,
+        noteCount,
+        username: findUser === null || findUser === void 0 ? void 0 : findUser.username,
+    };
+    return result;
+});
 exports.UserService = {
     getAllUsers,
     getSingleUser,
@@ -138,4 +154,6 @@ exports.UserService = {
     getMyProfile,
     updateMyProfile,
     getValidateEmail,
+    // Dashboard Data
+    dashboardData,
 };

@@ -30,19 +30,25 @@ const form_constants_1 = require("./form.constants");
 const user_model_1 = require("../user/user.model");
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const paginationHelper_1 = require("../../../helper/paginationHelper");
+const mongodb_1 = require("mongodb");
 // Create Form
 const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.User.find({ _id: verifiedUser.id });
+    const { formName, formData } = payload;
+    const user = yield user_model_1.User.find({ _id: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     if (user.length === 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
     }
     const isExist = yield form_model_1.Form.find({
-        $and: [{ email: payload === null || payload === void 0 ? void 0 : payload.email }, { formName: payload === null || payload === void 0 ? void 0 : payload.formName }],
+        $and: [{ user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }, { formName: payload === null || payload === void 0 ? void 0 : payload.formName }],
     });
     if (isExist.length > 0) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You already have a from with this name.');
     }
-    const result = yield form_model_1.Form.create(payload);
+    const result = yield form_model_1.Form.create({
+        user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        formName,
+        formData,
+    });
     return result;
 });
 // Get All Forms (can also filter)
@@ -88,15 +94,16 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
     const result = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? whereCondition
         : {
-            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
+            $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],
         })
+        .populate({ path: 'user', select: 'email' })
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
     const total = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? whereCondition
         : {
-            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
+            $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],
         });
     return {
         meta: {
@@ -111,7 +118,7 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
 const getSingleForm = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, function* () {
     if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) !== 'admin') {
         const form = yield form_model_1.Form.findById({ _id: id });
-        if ((form === null || form === void 0 ? void 0 : form.email) !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email)) {
+        if (new mongodb_1.ObjectId(form === null || form === void 0 ? void 0 : form.user).toHexString() !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id)) {
             throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to access this!');
         }
     }

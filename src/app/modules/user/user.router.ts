@@ -22,6 +22,12 @@ router.patch(
 router.get('/validate_email', UserController.getValidateEmail);
 
 router.get(
+  '/dashboard-data',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  UserController.dashboardData
+);
+
+router.get(
   '/:id',
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   UserController.getSingleUser

@@ -112,6 +112,23 @@ const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const dashboardData: RequestHandler = catchAsync(async (req, res) => {
+  const token: any = req.headers.authorization;
+  const verifiedUser = jwtHelpers.verifyToken(
+    token,
+    config.jwt.secret as Secret
+  );
+
+  const result = await UserService.dashboardData(verifiedUser);
+
+  sendResponse<any>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Dashboard data retrieved successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   getAllUser,
   getSingleUser,
@@ -120,4 +137,6 @@ export const UserController = {
   getMyProfile,
   updateMyProfile,
   getValidateEmail,
+  // Dashboard Data
+  dashboardData,
 };

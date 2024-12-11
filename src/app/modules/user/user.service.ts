@@ -10,6 +10,8 @@ import httpStatus from 'http-status';
 import ApiError from '../../../errors/apiError';
 import { JwtPayload } from 'jsonwebtoken';
 import { bcryptHelpers } from '../../../helper/bcryptHelpers';
+import { Form } from '../form/form.model';
+import { Note } from '../note/note.model';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -117,16 +119,8 @@ const updateMyProfile = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'user not found');
   }
 
-  const { name, password, ...userData } = payload;
+  const { password, ...userData } = payload;
   const updateUserData: Partial<IUser> = { ...userData };
-
-  // dynamically handling nested fields
-  if (name && Object.keys(name)?.length > 0) {
-    Object.keys(name).forEach(key => {
-      const nameKey = `name.${key}` as keyof Partial<IUser>;
-      (updateUserData as any)[nameKey] = name[key as keyof typeof name];
-    });
-  }
 
   // hash the password before updating
   if (password) {
@@ -152,6 +146,37 @@ const getValidateEmail = async (email: string | undefined) => {
   }
 };
 
+const dashboardData = async (verifiedUser: JwtPayload | null) => {
+  const findUser = await User.findById(verifiedUser?.id);
+
+  if (!findUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  const tallyCount = await Form.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          email: verifiedUser?.email,
+        }
+  );
+  const noteCount = await Note.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          user: verifiedUser?.id,
+        }
+  );
+
+  const result = {
+    tallyCount,
+    noteCount,
+    username: findUser?.username,
+  };
+
+  return result;
+};
+
 export const UserService = {
   getAllUsers,
   getSingleUser,
@@ -160,4 +185,6 @@ export const UserService = {
   getMyProfile,
   updateMyProfile,
   getValidateEmail,
+  // Dashboard Data
+  dashboardData,
 };

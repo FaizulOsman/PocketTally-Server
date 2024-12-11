@@ -105,7 +105,7 @@ const deleteUser = async (id: string): Promise<IUser | null> => {
 const getMyProfile = async (
   verifiedUser: JwtPayload | null
 ): Promise<IUser | null> => {
-  const result = await User.findOne({ email: verifiedUser?.email });
+  const result = await User.findById(verifiedUser?.id);
 
   return result;
 };
@@ -157,7 +157,7 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
     verifiedUser?.role === 'admin'
       ? {}
       : {
-          email: verifiedUser?.email,
+          user: verifiedUser?.id,
         }
   );
   const noteCount = await Note.countDocuments(

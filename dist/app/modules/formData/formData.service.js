@@ -118,7 +118,7 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
     }
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
     const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
-    let result = yield formData_model_1.FormData.find(whereCondition);
+    let result = yield formData_model_1.FormData.find(whereCondition).sort({ createdAt: -1 });
     // Sort by "data" field dynamically if required
     if (sortBy && sortOrder && sortBy.startsWith('data.')) {
         const parsedSortKey = sortBy.replace('data.', '');

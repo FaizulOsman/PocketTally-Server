@@ -21,7 +21,7 @@ const createData = async (
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  const form = await Form.findOne({ _id: payload?.formId });
+  const form = await Form.findById(payload?.form);
 
   if (!form || !form?.formData) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
@@ -192,7 +192,7 @@ const updateData = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Form not found');
   }
 
-  const form = await Form.findOne({ _id: existingData.formId });
+  const form = await Form.findById(existingData.form);
   if (!form || !form.formData) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
@@ -251,7 +251,7 @@ const deleteData = async (id: string): Promise<IFormData | null> => {
 
 // Delete Many
 const deleteMany = async (id: string): Promise<any> => {
-  const result = await FormData.deleteMany({ formId: id });
+  const result = await FormData.deleteMany({ form: id });
   if (!result) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Data Not Found');
   }

@@ -1,11 +1,12 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import { IFormData, FormDataModel } from './formData.interface';
 
 // FormData Schema
 const FormDataSchema = new Schema<IFormData>(
   {
-    formId: {
-      type: String,
+    form: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Form',
       required: true,
     },
     data: {

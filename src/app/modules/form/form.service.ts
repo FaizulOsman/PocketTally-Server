@@ -10,19 +10,22 @@ import { IGenericResponse } from '../../../interfaces/common';
 import { User } from '../user/user.model';
 import ApiError from '../../../errors/apiError';
 import { paginationHelper } from '../../../helper/paginationHelper';
+import { ObjectId } from 'mongodb';
 
 // Create Form
 const createForm = async (
   payload: IForm,
   verifiedUser: any
 ): Promise<IForm | null> => {
-  const user = await User.find({ _id: verifiedUser.id });
+  const { formName, formData } = payload;
+
+  const user = await User.find({ _id: verifiedUser?.id });
   if (user.length === 0) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
 
   const isExist = await Form.find({
-    $and: [{ email: payload?.email }, { formName: payload?.formName }],
+    $and: [{ user: verifiedUser?.id }, { formName: payload?.formName }],
   });
   if (isExist.length > 0) {
     throw new ApiError(
@@ -31,7 +34,11 @@ const createForm = async (
     );
   }
 
-  const result = await Form.create(payload);
+  const result = await Form.create({
+    user: verifiedUser?.id,
+    formName,
+    formData,
+  });
   return result;
 };
 
@@ -95,9 +102,10 @@ const getAllForms = async (
     verifiedUser?.role === 'admin'
       ? whereCondition
       : {
-          $and: [whereCondition, { email: verifiedUser?.email }],
+          $and: [whereCondition, { user: verifiedUser?.id }],
         }
   )
+    .populate({ path: 'user', select: 'email' })
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
@@ -106,7 +114,7 @@ const getAllForms = async (
     verifiedUser?.role === 'admin'
       ? whereCondition
       : {
-          $and: [whereCondition, { email: verifiedUser?.email }],
+          $and: [whereCondition, { user: verifiedUser?.id }],
         }
   );
 
@@ -128,7 +136,7 @@ const getSingleForm = async (
   if (verifiedUser?.role !== 'admin') {
     const form = await Form.findById({ _id: id });
 
-    if (form?.email !== verifiedUser?.email) {
+    if (new ObjectId(form?.user).toHexString() !== verifiedUser?.id) {
       throw new ApiError(
         httpStatus.NOT_FOUND,
         'You are not authorized to access this!'

@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 export type IFormData = {
   type: string;
@@ -9,7 +9,7 @@ export type IFormData = {
 };
 
 export type IForm = {
-  email: string;
+  user: mongoose.Types.ObjectId;
   formName: string;
   formData: IFormData[];
   moreOptions: boolean;
@@ -20,7 +20,6 @@ export type FormModel = Model<IForm, Record<string, unknown>>;
 
 export type IFormFilters = {
   searchTerm?: string;
-  email?: string;
   formName?: string;
   dateRange?: string;
 };

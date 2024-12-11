@@ -1,11 +1,12 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import { IForm, FormModel } from './form.interface';
 
 // Form Schema
 const FormSchema = new Schema<IForm>(
   {
-    email: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     formName: {

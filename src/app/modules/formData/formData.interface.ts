@@ -1,7 +1,7 @@
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 export type IFormData = {
-  formId: string;
+  form: mongoose.Types.ObjectId;
   data: string;
 };
 
@@ -11,6 +11,6 @@ export type FormDataModel = Model<IFormData, Record<string, unknown>>;
 export type IFormDataFilters = {
   searchTerm?: string;
   data?: string;
-  formId?: string;
+  form?: string | mongoose.Types.ObjectId;
   dateRange?: string;
 };

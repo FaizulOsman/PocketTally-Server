@@ -33,6 +33,8 @@ const pagination_1 = require("../../../constants/pagination");
 const config_1 = __importDefault(require("../../../config"));
 const pick_1 = require("../../../shared/pick");
 const jwtHelpers_1 = require("../../../helper/jwtHelpers");
+const form_model_1 = require("../form/form.model");
+const apiError_1 = __importDefault(require("../../../errors/apiError"));
 // Create
 const createData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const token = req.headers.authorization;
@@ -51,6 +53,9 @@ const createData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const getAllData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, formData_constants_1.formDataFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
+    const findForm = yield form_model_1.Form.findById(filters.form);
+    if (!findForm)
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Tally Not Found');
     const result = yield formData_service_1.FormDataService.getAllData(filters, paginationOptions);
     // Send Response
     (0, sendResponse_1.default)(res, {

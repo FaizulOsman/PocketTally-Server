@@ -87,7 +87,9 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
     const andConditions = [];
     if (searchTerm) {
         andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
-            $or: formData_constants_1.formDataSearchableFields === null || formData_constants_1.formDataSearchableFields === void 0 ? void 0 : formData_constants_1.formDataSearchableFields.map(field => ({
+            $or: formData_constants_1.formDataSearchableFields
+                .filter(field => { var _a; return ((_a = formData_model_1.FormData.schema.path(field)) === null || _a === void 0 ? void 0 : _a.instance) === 'String'; })
+                .map(field => ({
                 [field]: {
                     $regex: searchTerm,
                     $options: 'i',

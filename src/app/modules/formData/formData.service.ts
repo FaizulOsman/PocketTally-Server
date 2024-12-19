@@ -89,12 +89,14 @@ const getAllData = async (
 
   if (searchTerm) {
     andConditions?.push({
-      $or: formDataSearchableFields?.map(field => ({
-        [field]: {
-          $regex: searchTerm,
-          $options: 'i',
-        },
-      })),
+      $or: formDataSearchableFields
+        .filter(field => FormData.schema.path(field)?.instance === 'String')
+        .map(field => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
     });
   }
 

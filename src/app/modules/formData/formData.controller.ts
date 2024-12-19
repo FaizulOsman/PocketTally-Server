@@ -10,6 +10,8 @@ import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 import { pick } from '../../../shared/pick';
 import { jwtHelpers } from '../../../helper/jwtHelpers';
+import { Form } from '../form/form.model';
+import ApiError from '../../../errors/apiError';
 
 // Create
 const createData: RequestHandler = catchAsync(
@@ -39,6 +41,9 @@ const getAllData: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const filters = pick(req.query, formDataFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
+
+    const findForm = await Form.findById(filters.form);
+    if (!findForm) throw new ApiError(httpStatus.NOT_FOUND, 'Tally Not Found');
 
     const result = await FormDataService.getAllData(filters, paginationOptions);
 

@@ -83,10 +83,7 @@ const getAllData = async (
   filters: IFormDataFilters,
   paginationOptions: IPaginationOptions
 ): Promise<IGenericResponse<IFormData[]>> => {
-  const { searchTerm, dateRange, form, ...filtersData } = filters;
-
-  const findForm = await Form.findById(form);
-  if (!findForm) throw new ApiError(httpStatus.NOT_FOUND, 'Tally Not Found');
+  const { searchTerm, dateRange, ...filtersData } = filters;
 
   const andConditions: Record<string, any>[] = [];
 

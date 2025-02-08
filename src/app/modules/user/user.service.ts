@@ -12,6 +12,8 @@ import { JwtPayload } from 'jsonwebtoken';
 import { bcryptHelpers } from '../../../helper/bcryptHelpers';
 import { Form } from '../form/form.model';
 import { Note } from '../note/note.model';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { FormData } from '../formData/formData.model';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -168,10 +170,37 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
         }
   );
 
+  // Fetch all forms for the user
+  const forms = await Form.find(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          user: verifiedUser?.id,
+        }
+  );
+
+  // Prepare tallyData
+  const tallyData = await Promise.all(
+    forms.map(async form => {
+      const data = [];
+      for (let i = 0; i < 12; i++) {
+        const start = startOfMonth(subMonths(new Date(), i));
+        const end = endOfMonth(subMonths(new Date(), i));
+        const count = await FormData.countDocuments({
+          form: form._id,
+          createdAt: { $gte: start, $lte: end },
+        });
+        data.unshift(count); // Add to the beginning to maintain chronological order
+      }
+      return { legend: form.formName, data };
+    })
+  );
+
   const result = {
     tallyCount,
     noteCount,
     username: findUser?.username,
+    tallyData,
   };
 
   return result;

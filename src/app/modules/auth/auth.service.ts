@@ -70,14 +70,16 @@ const createUser = async (payload: IUser): Promise<IUserSignupResponse> => {
 
 const login = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   const user = new User();
-  const isUserExist = await user.isUserExist(payload.email);
+  const isUserExist = await User.findOne({
+    $or: [{ email: payload.email }, { username: payload.email }],
+  });
 
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
 
   if (
-    isUserExist.password &&
+    payload.password &&
     !(await user.isPasswordMatch(payload.password, isUserExist.password))
   ) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid password');
@@ -115,8 +117,7 @@ const login = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
 const googleLogin = async (
   payload: IUserLogin
 ): Promise<IUserLoginResponse> => {
-  const user = new User();
-  const isUserExist = await user.isUserExist(payload.email);
+  const isUserExist = await User.findOne({ email: payload.email });
 
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');

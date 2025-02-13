@@ -9,7 +9,6 @@ import {
   IUserSignupResponse,
 } from './auth.interface';
 import config from '../../../config';
-import { User } from '../user/user.model';
 // import generateRandomUsername from '../../../utils/generateRandomUsername';
 // import generateRandomPassword from '../../../utils/generateRandomPassword';
 // import { encryptPassword } from '../../../helper/encryptPassword';
@@ -75,40 +74,29 @@ const login: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const googleLogin: RequestHandler = catchAsync(async (req, res) => {
-  const { ...loginData } = req.body;
+  const { ...payload } = req.body;
 
   try {
     // For Android App Only
     if (req?.body?.androidApp) {
-      const userExists = await User.findOne({ email: req?.body?.email });
+      const { refreshToken, ...userData } = await AuthService.googleLogin(
+        payload
+      );
 
-      if (userExists) {
-        const { refreshToken, ...userData } = await AuthService.googleLogin(
-          loginData
-        );
+      // set refresh token in the browser cookie
+      const cookieOptions = {
+        secure: config.node_env === 'production',
+        httpOnly: true,
+      };
 
-        // set refresh token in the browser cookie
-        const cookieOptions = {
-          secure: config.node_env === 'production',
-          httpOnly: true,
-        };
+      res.cookie('refreshToken', refreshToken, cookieOptions);
 
-        res.cookie('refreshToken', refreshToken, cookieOptions);
-
-        return sendResponse<IUserLoginResponse>(res, {
-          statusCode: httpStatus.OK,
-          success: true,
-          message: 'Logged in successfully',
-          data: userData,
-        });
-      } else {
-        // User not found
-        return sendResponse<IUserLoginResponse>(res, {
-          statusCode: httpStatus.BAD_REQUEST,
-          success: false,
-          message: 'User not found. Please register first!',
-        });
-      }
+      return sendResponse<IUserLoginResponse>(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Logged in successfully',
+        data: userData,
+      });
     }
   } catch (error) {
     console.log({ error });

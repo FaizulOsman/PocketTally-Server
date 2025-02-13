@@ -114,42 +114,53 @@ const login = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   };
 };
 
-const googleLogin = async (
-  payload: IUserLogin
-): Promise<IUserLoginResponse> => {
-  const isUserExist = await User.findOne({ email: payload.email });
+const googleLogin = async (payload: any): Promise<IUserLoginResponse> => {
+  const { token } = payload;
 
-  if (!isUserExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  try {
+    const tokenInfoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+    );
+    if (!tokenInfoRes.ok) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Google token');
+    }
+
+    const data = await tokenInfoRes.json();
+
+    const findUser = await User.findOne({ email: data?.email });
+    if (!findUser) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Please register!');
+    }
+
+    const accessToken = jwtHelpers.createToken(
+      {
+        id: findUser?._id,
+        role: findUser?.role,
+        email: data.email,
+      },
+      config.jwt.secret as Secret,
+      config.jwt.expires_in as string
+    );
+
+    const refreshToken = jwtHelpers.createToken(
+      {
+        id: findUser?._id,
+        role: findUser?.role,
+        email: data.email,
+      },
+      config.jwt.refresh_secret as Secret,
+      config.jwt.refresh_expires_in as string
+    );
+
+    return {
+      userData: findUser,
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    console.error('Error during Google login:', error);
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Google login failed');
   }
-
-  const accessToken = jwtHelpers.createToken(
-    {
-      id: isUserExist._id,
-      role: isUserExist.role,
-      email: payload.email,
-    },
-    config.jwt.secret as Secret,
-    config.jwt.expires_in as string
-  );
-
-  const refreshToken = jwtHelpers.createToken(
-    {
-      id: isUserExist._id,
-      role: isUserExist.role,
-      email: payload.email,
-    },
-    config.jwt.refresh_secret as Secret,
-    config.jwt.refresh_expires_in as string
-  );
-
-  const userData = await User.findOne({ _id: isUserExist._id });
-
-  return {
-    userData,
-    accessToken,
-    refreshToken,
-  };
 };
 
 const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {

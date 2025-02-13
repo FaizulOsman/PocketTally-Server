@@ -41,7 +41,28 @@ const sendOTP = async (payload: IUser): Promise<IUserSignupResponse> => {
 };
 
 const createUser = async (payload: IUser): Promise<IUserSignupResponse> => {
-  const result = await User.create(payload);
+  const { username, name, email, phone, gender, imageUrl, password } = payload;
+
+  const findEmail = await User.findOne({ email });
+  if (findEmail)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exists');
+  const findUsername = await User.findOne({ username });
+  if (findUsername)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Username already exists');
+  const findPhone = await User.findOne({ phone });
+  if (findPhone)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number already exists');
+
+  const result = await User.create({
+    username,
+    name,
+    email,
+    phone,
+    gender,
+    imageUrl,
+    password,
+  });
+
   let accessToken;
   let refreshToken;
   if (result) {
@@ -117,50 +138,45 @@ const login = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
 const googleLogin = async (payload: any): Promise<IUserLoginResponse> => {
   const { token } = payload;
 
-  try {
-    const tokenInfoRes = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
-    );
-    if (!tokenInfoRes.ok) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Google token');
-    }
-
-    const data = await tokenInfoRes.json();
-
-    const findUser = await User.findOne({ email: data?.email });
-    if (!findUser) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Please register!');
-    }
-
-    const accessToken = jwtHelpers.createToken(
-      {
-        id: findUser?._id,
-        role: findUser?.role,
-        email: data.email,
-      },
-      config.jwt.secret as Secret,
-      config.jwt.expires_in as string
-    );
-
-    const refreshToken = jwtHelpers.createToken(
-      {
-        id: findUser?._id,
-        role: findUser?.role,
-        email: data.email,
-      },
-      config.jwt.refresh_secret as Secret,
-      config.jwt.refresh_expires_in as string
-    );
-
-    return {
-      userData: findUser,
-      accessToken,
-      refreshToken,
-    };
-  } catch (error) {
-    console.error('Error during Google login:', error);
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Google login failed');
+  const tokenInfoRes = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+  );
+  if (!tokenInfoRes.ok) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Google token');
   }
+
+  const data = await tokenInfoRes.json();
+
+  const findUser = await User.findOne({ email: data?.email });
+  if (!findUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Please register!');
+  }
+
+  const accessToken = jwtHelpers.createToken(
+    {
+      id: findUser?._id,
+      role: findUser?.role,
+      email: data.email,
+    },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string
+  );
+
+  const refreshToken = jwtHelpers.createToken(
+    {
+      id: findUser?._id,
+      role: findUser?.role,
+      email: data.email,
+    },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string
+  );
+
+  return {
+    userData: findUser,
+    accessToken,
+    refreshToken,
+  };
 };
 
 const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {

@@ -45,7 +45,7 @@ const createUser: RequestHandler = catchAsync(async (req, res) => {
   sendResponse<IUserSignupResponse>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'user created successfully',
+    message: 'Successfully registered',
     data: { result, accessToken },
   });
 });
@@ -76,35 +76,25 @@ const login: RequestHandler = catchAsync(async (req, res) => {
 const googleLogin: RequestHandler = catchAsync(async (req, res) => {
   const { ...payload } = req.body;
 
-  try {
-    // For Android App Only
-    if (req?.body?.androidApp) {
-      const { refreshToken, ...userData } = await AuthService.googleLogin(
-        payload
-      );
+  // For Android App Only
+  if (req?.body?.androidApp) {
+    const { refreshToken, ...userData } = await AuthService.googleLogin(
+      payload
+    );
 
-      // set refresh token in the browser cookie
-      const cookieOptions = {
-        secure: config.node_env === 'production',
-        httpOnly: true,
-      };
+    // set refresh token in the browser cookie
+    const cookieOptions = {
+      secure: config.node_env === 'production',
+      httpOnly: true,
+    };
 
-      res.cookie('refreshToken', refreshToken, cookieOptions);
-
-      return sendResponse<IUserLoginResponse>(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Logged in successfully',
-        data: userData,
-      });
-    }
-  } catch (error) {
-    console.log({ error });
+    res.cookie('refreshToken', refreshToken, cookieOptions);
 
     return sendResponse<IUserLoginResponse>(res, {
-      statusCode: httpStatus.BAD_REQUEST,
-      success: false,
-      message: 'Something went wrong',
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Logged in successfully',
+      data: userData,
     });
   }
 });

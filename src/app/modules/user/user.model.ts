@@ -8,12 +8,12 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema<IUser, UserModel>(
   {
-    username: { type: String, required: true },
+    username: { type: String },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: role },
+    phone: { type: String },
+    password: { type: String },
+    role: { type: String, enum: role, default: 'user' },
     address: { type: String },
     imageUrl: { type: String },
     dob: { type: String },

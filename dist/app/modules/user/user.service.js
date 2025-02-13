@@ -32,6 +32,8 @@ const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const bcryptHelpers_1 = require("../../../helper/bcryptHelpers");
 const form_model_1 = require("../form/form.model");
 const note_model_1 = require("../note/note.model");
+const date_fns_1 = require("date-fns");
+const formData_model_1 = require("../formData/formData.model");
 const getAllUsers = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = [];
@@ -119,7 +121,9 @@ const updateMyProfile = (user, payload) => __awaiter(void 0, void 0, void 0, fun
     return result;
 });
 const getValidateEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.findOne({ email });
+    const result = yield user_model_1.User.findOne({
+        $or: [{ email: email }, { username: email }],
+    });
     if (!result) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
@@ -139,10 +143,31 @@ const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, functi
         : {
             user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
         });
+    // Fetch all forms for the user
+    const forms = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
+    // Prepare tallyData
+    const tallyData = yield Promise.all(forms.map((form) => __awaiter(void 0, void 0, void 0, function* () {
+        const data = [];
+        for (let i = 0; i < 12; i++) {
+            const start = (0, date_fns_1.startOfMonth)((0, date_fns_1.subMonths)(new Date(), i));
+            const end = (0, date_fns_1.endOfMonth)((0, date_fns_1.subMonths)(new Date(), i));
+            const count = yield formData_model_1.FormData.countDocuments({
+                form: form._id,
+                createdAt: { $gte: start, $lte: end },
+            });
+            data.unshift(count); // Add to the beginning to maintain chronological order
+        }
+        return { legend: form.formName, data };
+    })));
     const result = {
         tallyCount,
         noteCount,
         username: findUser === null || findUser === void 0 ? void 0 : findUser.username,
+        tallyData,
     };
     return result;
 });

@@ -29,7 +29,6 @@ const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const http_status_1 = __importDefault(require("http-status"));
 const auth_service_1 = require("./auth.service");
 const config_1 = __importDefault(require("../../../config"));
-const user_model_1 = require("../user/user.model");
 // import generateRandomUsername from '../../../utils/generateRandomUsername';
 // import generateRandomPassword from '../../../utils/generateRandomPassword';
 // import { encryptPassword } from '../../../helper/encryptPassword';
@@ -56,7 +55,7 @@ const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'user created successfully',
+        message: 'Successfully registered',
         data: { result, accessToken },
     });
 }));
@@ -78,43 +77,22 @@ const login = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, 
     });
 }));
 const googleLogin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    const loginData = __rest(req.body, []);
-    try {
-        // For Android App Only
-        if ((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.androidApp) {
-            const userExists = yield user_model_1.User.findOne({ email: (_b = req === null || req === void 0 ? void 0 : req.body) === null || _b === void 0 ? void 0 : _b.email });
-            if (userExists) {
-                const _c = yield auth_service_1.AuthService.googleLogin(loginData), { refreshToken } = _c, userData = __rest(_c, ["refreshToken"]);
-                // set refresh token in the browser cookie
-                const cookieOptions = {
-                    secure: config_1.default.node_env === 'production',
-                    httpOnly: true,
-                };
-                res.cookie('refreshToken', refreshToken, cookieOptions);
-                return (0, sendResponse_1.default)(res, {
-                    statusCode: http_status_1.default.OK,
-                    success: true,
-                    message: 'Logged in successfully',
-                    data: userData,
-                });
-            }
-            else {
-                // User not found
-                return (0, sendResponse_1.default)(res, {
-                    statusCode: http_status_1.default.BAD_REQUEST,
-                    success: false,
-                    message: 'User not found. Please register first!',
-                });
-            }
-        }
-    }
-    catch (error) {
-        console.log({ error });
+    var _a;
+    const payload = __rest(req.body, []);
+    // For Android App Only
+    if ((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.androidApp) {
+        const _b = yield auth_service_1.AuthService.googleLogin(payload), { refreshToken } = _b, userData = __rest(_b, ["refreshToken"]);
+        // set refresh token in the browser cookie
+        const cookieOptions = {
+            secure: config_1.default.node_env === 'production',
+            httpOnly: true,
+        };
+        res.cookie('refreshToken', refreshToken, cookieOptions);
         return (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.BAD_REQUEST,
-            success: false,
-            message: 'Something went wrong',
+            statusCode: http_status_1.default.OK,
+            success: true,
+            message: 'Logged in successfully',
+            data: userData,
         });
     }
 }));

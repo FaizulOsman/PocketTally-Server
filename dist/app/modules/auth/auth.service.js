@@ -37,7 +37,25 @@ const sendOTP = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     return { result, refreshToken, accessToken };
 });
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.create(payload);
+    const { username, name, email, phone, gender, imageUrl, password } = payload;
+    const findEmail = yield user_model_1.User.findOne({ email });
+    if (findEmail)
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Email already exists');
+    const findUsername = yield user_model_1.User.findOne({ username });
+    if (findUsername)
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Username already exists');
+    const findPhone = yield user_model_1.User.findOne({ phone });
+    if (findPhone)
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Phone number already exists');
+    const result = yield user_model_1.User.create({
+        username,
+        name,
+        email,
+        phone,
+        gender,
+        imageUrl,
+        password,
+    });
     let accessToken;
     let refreshToken;
     if (result) {
@@ -56,11 +74,13 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user = new user_model_1.User();
-    const isUserExist = yield user.isUserExist(payload.email);
+    const isUserExist = yield user_model_1.User.findOne({
+        $or: [{ email: payload.email }, { username: payload.email }],
+    });
     if (!isUserExist) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
     }
-    if (isUserExist.password &&
+    if (payload.password &&
         !(yield user.isPasswordMatch(payload.password, isUserExist.password))) {
         throw new apiError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid password');
     }
@@ -82,24 +102,28 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 const googleLogin = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = new user_model_1.User();
-    const isUserExist = yield user.isUserExist(payload.email);
-    if (!isUserExist) {
-        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
+    const { token } = payload;
+    const tokenInfoRes = yield fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+    if (!tokenInfoRes.ok) {
+        throw new apiError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid Google token');
+    }
+    const data = yield tokenInfoRes.json();
+    const findUser = yield user_model_1.User.findOne({ email: data === null || data === void 0 ? void 0 : data.email });
+    if (!findUser) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Please register!');
     }
     const accessToken = jwtHelpers_1.jwtHelpers.createToken({
-        id: isUserExist._id,
-        role: isUserExist.role,
-        email: payload.email,
+        id: findUser === null || findUser === void 0 ? void 0 : findUser._id,
+        role: findUser === null || findUser === void 0 ? void 0 : findUser.role,
+        email: data.email,
     }, config_1.default.jwt.secret, config_1.default.jwt.expires_in);
     const refreshToken = jwtHelpers_1.jwtHelpers.createToken({
-        id: isUserExist._id,
-        role: isUserExist.role,
-        email: payload.email,
+        id: findUser === null || findUser === void 0 ? void 0 : findUser._id,
+        role: findUser === null || findUser === void 0 ? void 0 : findUser.role,
+        email: data.email,
     }, config_1.default.jwt.refresh_secret, config_1.default.jwt.refresh_expires_in);
-    const userData = yield user_model_1.User.findOne({ _id: isUserExist._id });
     return {
-        userData,
+        userData: findUser,
         accessToken,
         refreshToken,
     };

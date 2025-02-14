@@ -14,6 +14,7 @@ import { Form } from '../form/form.model';
 import { Note } from '../note/note.model';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { FormData } from '../formData/formData.model';
+import bcrypt from 'bcrypt';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -150,6 +151,39 @@ const getValidateEmail = async (email: string | undefined) => {
   }
 };
 
+const updatePassword = async (payload: any): Promise<IUser> => {
+  const { userId, currentPassword, newPassword } = payload;
+  const user = new User();
+
+  const findUser = await User.findById(userId);
+  if (!findUser) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+
+  const isMatch = await user.isPasswordMatch(
+    currentPassword,
+    findUser?.password
+  );
+  if (!isMatch)
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid current password');
+
+  const salt = await bcrypt.genSalt(10);
+  const updatePassword = await bcrypt.hash(newPassword, salt);
+
+  const newUpdatePasswordData = await User.findOneAndUpdate(
+    { _id: userId },
+    { password: updatePassword },
+    { new: true }
+  );
+
+  if (!newUpdatePasswordData) {
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to update password'
+    );
+  }
+
+  return newUpdatePasswordData;
+};
+
 const dashboardData = async (verifiedUser: JwtPayload | null) => {
   const findUser = await User.findById(verifiedUser?.id);
 
@@ -216,6 +250,7 @@ export const UserService = {
   getMyProfile,
   updateMyProfile,
   getValidateEmail,
+  updatePassword,
   // Dashboard Data
   dashboardData,
 };

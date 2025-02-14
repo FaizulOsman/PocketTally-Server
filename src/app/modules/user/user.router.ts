@@ -27,6 +27,12 @@ router.get(
   UserController.dashboardData
 );
 
+router.patch(
+  '/update-password',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  UserController.updatePassword
+);
+
 router.get(
   '/:id',
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),

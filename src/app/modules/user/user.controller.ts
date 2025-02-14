@@ -112,6 +112,23 @@ const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+export const updatePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const { id } = req.user as { id: string };
+
+  await UserService.updatePassword({
+    userId: id,
+    currentPassword,
+    newPassword,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Password updated successfully',
+  });
+});
+
 const dashboardData: RequestHandler = catchAsync(async (req, res) => {
   const token: any = req.headers.authorization;
   const verifiedUser = jwtHelpers.verifyToken(
@@ -137,6 +154,7 @@ export const UserController = {
   getMyProfile,
   updateMyProfile,
   getValidateEmail,
+  updatePassword,
   // Dashboard Data
   dashboardData,
 };

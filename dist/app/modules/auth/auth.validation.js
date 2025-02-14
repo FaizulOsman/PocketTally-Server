@@ -28,11 +28,9 @@ const createUserZodSchema = zod_1.z.object({
 });
 const loginUserZodSchema = zod_1.z.object({
     body: zod_1.z.object({
-        email: zod_1.z
-            .string({
+        email: zod_1.z.string({
             required_error: 'email is required',
-        })
-            .email('Invalid email format'),
+        }),
         password: zod_1.z
             .string({
             required_error: 'password is required',

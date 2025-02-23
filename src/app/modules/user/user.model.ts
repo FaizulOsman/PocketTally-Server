@@ -9,7 +9,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema<IUser, UserModel>(
   {
     username: { type: String },
-    name: { type: String, required: true },
+    name: { type: String },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     password: { type: String },
@@ -22,6 +22,7 @@ const userSchema = new Schema<IUser, UserModel>(
     city: { type: String },
     state: { type: String },
     country: { type: String },
+    otp: { type: String },
   },
   {
     timestamps: true,

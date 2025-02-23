@@ -28,4 +28,7 @@ router.post(
   AuthController.refreshToken
 );
 
+router.post('/send-email-otp', AuthController.sendEmailOtp);
+router.post('/verify-email-otp', AuthController.verifyEmailOtp);
+
 export const AuthRouter = router;

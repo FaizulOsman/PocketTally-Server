@@ -17,6 +17,7 @@ export type IUser = {
   city?: string;
   state?: string;
   country?: string;
+  otp?: string;
 };
 
 export type IUserMethods = {

@@ -103,13 +103,21 @@ const getValidateEmail: RequestHandler = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid email format');
   }
 
-  await UserService.getValidateEmail(email);
+  const emailExists = await UserService.getValidateEmail(email);
 
-  sendResponse<IUser>(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Email found successfully',
-  });
+  if (emailExists) {
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Email already exists',
+    });
+  } else {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: 'User not found!',
+    });
+  }
 });
 
 export const updatePassword = catchAsync(async (req, res) => {

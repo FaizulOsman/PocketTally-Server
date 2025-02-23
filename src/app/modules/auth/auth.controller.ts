@@ -9,11 +9,6 @@ import {
   IUserSignupResponse,
 } from './auth.interface';
 import config from '../../../config';
-// import generateRandomUsername from '../../../utils/generateRandomUsername';
-// import generateRandomPassword from '../../../utils/generateRandomPassword';
-// import { encryptPassword } from '../../../helper/encryptPassword';
-// import { getBDTime } from '../../../config/getTime';
-// import { googleLoginConfirmationMail } from '../../../utils/verificationEmail';
 
 const sendOTP: RequestHandler = catchAsync(async (req, res) => {
   const { ...userData } = req.body;
@@ -119,10 +114,40 @@ const refreshToken: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+// Send Email OTP
+const sendEmailOtp = catchAsync(async (req, res) => {
+  const otpData = await AuthService.sendEmailOtp(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'OTP sent successfully',
+    data: otpData,
+  });
+});
+
+// Verify Email OTP
+const verifyEmailOtp = catchAsync(async (req, res) => {
+  const { code } = req.body;
+
+  const response = await AuthService.verifyEmailOtp({
+    userId: req.user,
+    code,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    ...response,
+  });
+});
+
 export const AuthController = {
   sendOTP,
   createUser,
   login,
   googleLogin,
   refreshToken,
+  sendEmailOtp,
+  verifyEmailOtp,
 };

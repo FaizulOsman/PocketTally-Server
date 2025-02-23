@@ -146,9 +146,8 @@ const getValidateEmail = async (email: string | undefined) => {
   const result = await User.findOne({
     $or: [{ email: email }, { username: email }],
   });
-  if (!result) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
-  }
+
+  return !!result;
 };
 
 const updatePassword = async (payload: any): Promise<IUser> => {

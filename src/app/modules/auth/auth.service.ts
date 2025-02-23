@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/apiError';
 import { IUser } from '../user/user.interface';
@@ -11,6 +12,7 @@ import {
 import { jwtHelpers } from '../../../helper/jwtHelpers';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
+import nodemailer from 'nodemailer';
 
 const sendOTP = async (payload: IUser): Promise<IUserSignupResponse> => {
   const result = await User.create(payload);
@@ -213,10 +215,61 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
   };
 };
 
+const sendEmailOtp = async (payload: { email: string }): Promise<any> => {
+  const { email } = payload;
+
+  const findUser = await User.findOne({ email });
+  if (findUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exists');
+  }
+
+  // Generate a 6-digit random OTP
+  const generateOTP = () => Math.floor(1000 + Math.random() * 9000).toString();
+  const otp = generateOTP();
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_ID,
+      pass: process.env.GMAIL_KEY,
+    },
+  });
+  const mailOptions = {
+    from: process.env.GMAIL_ID,
+    to: email,
+    subject: 'OTP',
+    text: `Your verification code is: ${otp}`,
+  };
+  await transporter.sendMail(mailOptions);
+
+  return otp;
+};
+
+const verifyEmailOtp = async (payload: any): Promise<any> => {
+  const { userId, code } = payload;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (user.otp !== code) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid or expired OTP');
+  }
+
+  // Clear the OTP after successful verification
+  user.otp = undefined;
+  await user.save();
+
+  return { message: 'OTP verified successfully!', action: 'verified' };
+};
+
 export const AuthService = {
   sendOTP,
   createUser,
   login,
   googleLogin,
   refreshToken,
+  sendEmailOtp,
+  verifyEmailOtp,
 };

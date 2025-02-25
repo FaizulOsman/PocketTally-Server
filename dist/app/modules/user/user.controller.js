@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserController = void 0;
+exports.UserController = exports.updatePassword = void 0;
 const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
@@ -105,11 +105,34 @@ const getValidateEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 
     if (typeof email !== 'string') {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid email format');
     }
-    yield user_service_1.UserService.getValidateEmail(email);
+    const emailExists = yield user_service_1.UserService.getValidateEmail(email);
+    if (emailExists) {
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
+            success: true,
+            message: 'Email already exists',
+        });
+    }
+    else {
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.NOT_FOUND,
+            success: false,
+            message: 'User not found!',
+        });
+    }
+}));
+exports.updatePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { currentPassword, newPassword } = req.body;
+    const { id } = req.user;
+    yield user_service_1.UserService.updatePassword({
+        userId: id,
+        currentPassword,
+        newPassword,
+    });
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Email found successfully',
+        message: 'Password updated successfully',
     });
 }));
 const dashboardData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -131,6 +154,7 @@ exports.UserController = {
     getMyProfile,
     updateMyProfile,
     getValidateEmail,
+    updatePassword: exports.updatePassword,
     // Dashboard Data
     dashboardData,
 };

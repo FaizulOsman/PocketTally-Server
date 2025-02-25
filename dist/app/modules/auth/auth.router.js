@@ -15,4 +15,6 @@ router.post('/google_login',
 // validateRequest(authValidation.loginUserZodSchema),
 auth_controller_1.AuthController.googleLogin);
 router.post('/refresh-token', (0, validateRequest_1.default)(auth_validation_1.authValidation.refreshTokenZodSchema), auth_controller_1.AuthController.refreshToken);
+router.post('/send-email-otp', auth_controller_1.AuthController.sendEmailOtp);
+router.post('/verify-email-otp', auth_controller_1.AuthController.verifyEmailOtp);
 exports.AuthRouter = router;

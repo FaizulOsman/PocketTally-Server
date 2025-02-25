@@ -34,6 +34,7 @@ const form_model_1 = require("../form/form.model");
 const note_model_1 = require("../note/note.model");
 const date_fns_1 = require("date-fns");
 const formData_model_1 = require("../formData/formData.model");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const getAllUsers = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = [];
@@ -124,9 +125,24 @@ const getValidateEmail = (email) => __awaiter(void 0, void 0, void 0, function* 
     const result = yield user_model_1.User.findOne({
         $or: [{ email: email }, { username: email }],
     });
-    if (!result) {
-        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
+    return !!result;
+});
+const updatePassword = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, currentPassword, newPassword } = payload;
+    const user = new user_model_1.User();
+    const findUser = yield user_model_1.User.findById(userId);
+    if (!findUser)
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
+    const isMatch = yield user.isPasswordMatch(currentPassword, findUser === null || findUser === void 0 ? void 0 : findUser.password);
+    if (!isMatch)
+        throw new apiError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid current password');
+    const salt = yield bcrypt_1.default.genSalt(10);
+    const updatePassword = yield bcrypt_1.default.hash(newPassword, salt);
+    const newUpdatePasswordData = yield user_model_1.User.findOneAndUpdate({ _id: userId }, { password: updatePassword }, { new: true });
+    if (!newUpdatePasswordData) {
+        throw new apiError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to update password');
     }
+    return newUpdatePasswordData;
 });
 const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     const findUser = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
@@ -179,6 +195,7 @@ exports.UserService = {
     getMyProfile,
     updateMyProfile,
     getValidateEmail,
+    updatePassword,
     // Dashboard Data
     dashboardData,
 };

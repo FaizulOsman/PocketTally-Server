@@ -21,7 +21,7 @@ const config_1 = __importDefault(require("../../../config"));
 const { Schema } = mongoose_1.default;
 const userSchema = new Schema({
     username: { type: String },
-    name: { type: String, required: true },
+    name: { type: String },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     password: { type: String },
@@ -34,6 +34,7 @@ const userSchema = new Schema({
     city: { type: String },
     state: { type: String },
     country: { type: String },
+    otp: { type: String },
 }, {
     timestamps: true,
     toJSON: {

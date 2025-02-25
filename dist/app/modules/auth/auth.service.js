@@ -13,11 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const http_status_1 = __importDefault(require("http-status"));
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const user_model_1 = require("../user/user.model");
 const jwtHelpers_1 = require("../../../helper/jwtHelpers");
 const config_1 = __importDefault(require("../../../config"));
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const sendOTP = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.User.create(payload);
     let accessToken;
@@ -150,10 +152,51 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         accessToken,
     };
 });
+const sendEmailOtp = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = payload;
+    const findUser = yield user_model_1.User.findOne({ email });
+    if (findUser) {
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Email already exists');
+    }
+    // Generate a 6-digit random OTP
+    const generateOTP = () => Math.floor(1000 + Math.random() * 9000).toString();
+    const otp = generateOTP();
+    const transporter = nodemailer_1.default.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.GMAIL_ID,
+            pass: process.env.GMAIL_KEY,
+        },
+    });
+    const mailOptions = {
+        from: process.env.GMAIL_ID,
+        to: email,
+        subject: 'OTP',
+        text: `Your verification code is: ${otp}`,
+    };
+    yield transporter.sendMail(mailOptions);
+    return otp;
+});
+const verifyEmailOtp = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, code } = payload;
+    const user = yield user_model_1.User.findById(userId);
+    if (!user) {
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
+    }
+    if (user.otp !== code) {
+        throw new apiError_1.default(http_status_1.default.UNAUTHORIZED, 'Invalid or expired OTP');
+    }
+    // Clear the OTP after successful verification
+    user.otp = undefined;
+    yield user.save();
+    return { message: 'OTP verified successfully!', action: 'verified' };
+});
 exports.AuthService = {
     sendOTP,
     createUser,
     login,
     googleLogin,
     refreshToken,
+    sendEmailOtp,
+    verifyEmailOtp,
 };

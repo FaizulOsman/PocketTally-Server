@@ -29,11 +29,6 @@ const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const http_status_1 = __importDefault(require("http-status"));
 const auth_service_1 = require("./auth.service");
 const config_1 = __importDefault(require("../../../config"));
-// import generateRandomUsername from '../../../utils/generateRandomUsername';
-// import generateRandomPassword from '../../../utils/generateRandomPassword';
-// import { encryptPassword } from '../../../helper/encryptPassword';
-// import { getBDTime } from '../../../config/getTime';
-// import { googleLoginConfirmationMail } from '../../../utils/verificationEmail';
 const sendOTP = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = __rest(req.body, []);
     yield auth_service_1.AuthService.sendOTP(userData);
@@ -112,10 +107,31 @@ const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         data: result,
     });
 }));
+// Send Email OTP
+const sendEmailOtp = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const otpData = yield auth_service_1.AuthService.sendEmailOtp(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'OTP sent successfully',
+        data: otpData,
+    });
+}));
+// Verify Email OTP
+const verifyEmailOtp = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { code } = req.body;
+    const response = yield auth_service_1.AuthService.verifyEmailOtp({
+        userId: req.user,
+        code,
+    });
+    (0, sendResponse_1.default)(res, Object.assign({ statusCode: http_status_1.default.OK, success: true }, response));
+}));
 exports.AuthController = {
     sendOTP,
     createUser,
     login,
     googleLogin,
     refreshToken,
+    sendEmailOtp,
+    verifyEmailOtp,
 };

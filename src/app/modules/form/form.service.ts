@@ -30,7 +30,7 @@ const createForm = async (
   if (isExist.length > 0) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
-      'You already have a from with this name.'
+      'You already have a tally with this name.'
     );
   }
 
@@ -153,14 +153,20 @@ const updateForm = async (
   id: string,
   payload: Partial<IForm>
 ): Promise<IForm | null> => {
-  const isExist = await Form.findOne({ _id: id });
+  const { formName, formData } = payload;
+
+  const isExist = await Form.findById(id);
   if (!isExist) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Form not found');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Tally not found');
   }
 
-  const result = await Form.findOneAndUpdate({ _id: id }, payload, {
-    new: true,
-  });
+  const result = await Form.findByIdAndUpdate(
+    id,
+    { formName, formData },
+    {
+      new: true,
+    }
+  );
 
   return result;
 };

@@ -17,7 +17,7 @@ const createNote = async (
   verifiedUser: any,
   payload: INote
 ): Promise<INote | null> => {
-  const { title, description } = payload;
+  const { title, description, type } = payload;
 
   const findUser = await User.findById(verifiedUser?.id);
   if (!findUser) {
@@ -36,6 +36,7 @@ const createNote = async (
     user: verifiedUser?.id,
     title,
     description,
+    type,
   });
   return result;
 };
@@ -156,7 +157,7 @@ const updateNote = async (
   id: string,
   payload: Partial<INote>
 ): Promise<INote | null> => {
-  const { title, description } = payload;
+  const { title, description, type } = payload;
 
   const findNote = await Note.findById(id);
   if (!findNote) {
@@ -179,6 +180,7 @@ const updateNote = async (
     {
       title: title || findNote?.title,
       description: description || findNote?.description,
+      type: type || findNote?.type,
     },
     {
       new: true,

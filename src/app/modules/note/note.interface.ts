@@ -4,6 +4,7 @@ export type INote = {
   user: mongoose.Types.ObjectId;
   title: string;
   description: string;
+  type: string;
 };
 
 // Note Model
@@ -14,4 +15,5 @@ export type INoteFilters = {
   title?: string;
   description?: string;
   dateRange?: string;
+  type?: string;
 };

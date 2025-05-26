@@ -40,6 +40,10 @@ const NoteSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    type: {
+        type: String,
+        required: true,
+    },
 }, {
     timestamps: true,
     toJSON: {

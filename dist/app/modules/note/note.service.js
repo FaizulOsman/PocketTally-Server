@@ -33,7 +33,7 @@ const paginationHelper_1 = require("../../../helper/paginationHelper");
 const mongodb_1 = require("mongodb");
 // Create
 const createNote = (verifiedUser, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title, description } = payload;
+    const { title, description, type } = payload;
     const findUser = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
     if (!findUser) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
@@ -46,6 +46,7 @@ const createNote = (verifiedUser, payload) => __awaiter(void 0, void 0, void 0, 
         user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
         title,
         description,
+        type,
     });
     return result;
 });
@@ -128,7 +129,7 @@ const getSingleNote = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, fu
 });
 // Update
 const updateNote = (verifiedUser, id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title, description } = payload;
+    const { title, description, type } = payload;
     const findNote = yield note_model_1.Note.findById(id);
     if (!findNote) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Note not found');
@@ -142,6 +143,7 @@ const updateNote = (verifiedUser, id, payload) => __awaiter(void 0, void 0, void
     const result = yield note_model_1.Note.findOneAndUpdate({ _id: id }, {
         title: title || (findNote === null || findNote === void 0 ? void 0 : findNote.title),
         description: description || (findNote === null || findNote === void 0 ? void 0 : findNote.description),
+        type: type || (findNote === null || findNote === void 0 ? void 0 : findNote.type),
     }, {
         new: true,
     });

@@ -42,7 +42,7 @@ const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
         $and: [{ user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }, { formName: payload === null || payload === void 0 ? void 0 : payload.formName }],
     });
     if (isExist.length > 0) {
-        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You already have a from with this name.');
+        throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You already have a tally with this name.');
     }
     const result = yield form_model_1.Form.create({
         user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
@@ -126,11 +126,12 @@ const getSingleForm = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, fu
     return result;
 });
 const updateForm = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield form_model_1.Form.findOne({ _id: id });
+    const { formName, formData } = payload;
+    const isExist = yield form_model_1.Form.findById(id);
     if (!isExist) {
-        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Form not found');
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Tally not found');
     }
-    const result = yield form_model_1.Form.findOneAndUpdate({ _id: id }, payload, {
+    const result = yield form_model_1.Form.findByIdAndUpdate(id, { formName, formData }, {
         new: true,
     });
     return result;

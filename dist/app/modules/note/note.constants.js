@@ -1,5 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.noteSearchableFields = exports.noteFilterableFields = void 0;
-exports.noteFilterableFields = ['searchTerm', 'title', 'description'];
-exports.noteSearchableFields = ['searchTerm', 'title', 'description'];
+exports.noteTypes = exports.noteSearchableFields = exports.noteFilterableFields = void 0;
+exports.noteFilterableFields = [
+    'searchTerm',
+    'title',
+    'description',
+    'type',
+];
+exports.noteSearchableFields = [
+    'searchTerm',
+    'title',
+    'description',
+    'type',
+];
+exports.noteTypes = ['text', 'list'];

@@ -7,5 +7,5 @@
 
 ## Github Repository Link:
 
-- Frontend:
-- Backend:
+-- Frontend:
+-- Backend:

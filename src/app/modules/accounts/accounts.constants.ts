@@ -8,11 +8,7 @@ export const accountsFilterableFields = [
   'customerName',
   'type',
   'date',
+  'amount',
 ];
 
-export const accountsSearchableFields = [
-  'searchTerm',
-  'customerName',
-  'type',
-  'date',
-];
+export const accountsSearchableFields = ['customerName', 'description'];

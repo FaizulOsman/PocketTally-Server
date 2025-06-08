@@ -182,8 +182,68 @@ export class AccountsService {
 
   static async getCustomerTransactions(
     user: any,
-    customerId: string
-  ): Promise<ITransaction[]> {
-    return Transaction.find({ customerId }).sort({ date: -1 });
+    customerId: string,
+    filters: any,
+    paginationOptions: IPaginationOptions
+  ): Promise<IGenericResponse<ITransaction[]>> {
+    const { searchTerm, ...filtersData } = filters;
+    const andConditions = [];
+
+    // Base condition for customerId
+    andConditions.push({
+      customerId: new ObjectId(customerId),
+    });
+
+    if (searchTerm) {
+      andConditions.push({
+        $or: [
+          {
+            description: {
+              $regex: searchTerm,
+              $options: 'i',
+            },
+          },
+        ],
+      });
+    }
+
+    if (Object.keys(filtersData).length) {
+      andConditions.push({
+        $and: Object.entries(filtersData).map(([field, value]) => ({
+          [field]: value,
+        })),
+      });
+    }
+
+    const whereConditions =
+      andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const { page, limit, skip, sortBy, sortOrder } =
+      paginationHelper.calculatePagination(paginationOptions);
+
+    const sortConditions: { [key: string]: SortOrder } = {};
+
+    if (sortBy && sortOrder) {
+      sortConditions[sortBy] = sortOrder;
+    } else {
+      // Default sort by date in descending order
+      sortConditions['date'] = -1;
+    }
+
+    const result = await Transaction.find(whereConditions)
+      .sort(sortConditions)
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Transaction.countDocuments(whereConditions);
+
+    return {
+      meta: {
+        page,
+        limit,
+        total,
+      },
+      data: result,
+    };
   }
 }

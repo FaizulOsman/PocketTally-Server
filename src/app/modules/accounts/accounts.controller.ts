@@ -158,6 +158,8 @@ const createTransaction: RequestHandler = catchAsync(
 const getCustomerTransactions: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const customerId = req.params.customerId;
+    const filters = pick(req.query, accountsFilterableFields);
+    const paginationOptions = pick(req.query, paginationFields);
 
     const token: any = req.headers.authorization;
     const verifiedUser = jwtHelpers.verifyToken(
@@ -167,14 +169,17 @@ const getCustomerTransactions: RequestHandler = catchAsync(
 
     const result = await AccountsService.getCustomerTransactions(
       verifiedUser,
-      customerId
+      customerId,
+      filters,
+      paginationOptions
     );
 
     sendResponse<ITransaction[]>(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: 'Transactions retrieved Successfully',
-      data: result,
+      meta: result.meta,
+      data: result.data,
     });
   }
 );

@@ -1,29 +1,40 @@
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 export type ITransaction = {
-  customerId: string;
+  _id: Types.ObjectId;
+  customerId: Types.ObjectId;
   amount: number;
   type: 'CREDIT' | 'DEBIT';
-  description?: string;
   date: string;
+  description?: string;
+  createdBy: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ICustomerAccount = {
+  _id: Types.ObjectId;
+  user: Types.ObjectId;
   customerName: string;
+  phoneNumber?: string;
+  description?: string;
   totalDue: number;
-  lastTransactionDate: string;
-  recentTransactions: ITransaction[];
-  user: mongoose.Types.ObjectId;
+  lastTransactionDate?: string;
+  recentTransactions: any[];
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ICreateCustomerDto = {
   customerName: string;
+  phoneNumber?: string;
+  description?: string;
 };
 
 export type ICreateTransactionDto = {
-  customerId: mongoose.Types.ObjectId;
+  customerId: string;
   amount: number;
   type: 'CREDIT' | 'DEBIT';
-  description?: string;
   date: string;
+  description?: string;
 };

@@ -22,7 +22,6 @@ const createCustomer: RequestHandler = catchAsync(
       token,
       config.jwt.secret as Secret
     );
-    console.log('aaaaaaaaaaaaaaaa', payload);
 
     const result = await AccountsService.createCustomer(verifiedUser, payload);
 

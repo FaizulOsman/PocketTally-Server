@@ -18,15 +18,38 @@ export class AccountsService {
     user: any,
     payload: ICreateCustomerDto
   ): Promise<ICustomerAccount> {
-    const customerId = Date.now().toString();
-    const customer = new CustomerAccount({
-      customerId,
+    if (!user?.id) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        'User ID is required to create a customer'
+      );
+    }
+
+    if (!payload.customerName?.trim()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Customer name is required');
+    }
+
+    const findCustomer = await CustomerAccount.findOne({
       customerName: payload.customerName,
+    });
+    if (findCustomer) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        'Customer name already exist!'
+      );
+    }
+
+    const customer = new CustomerAccount({
+      user: user.id,
+      customerName: payload.customerName.trim(),
+      phoneNumber: payload.phoneNumber?.trim(),
+      description: payload.description?.trim(),
       totalDue: 0,
       recentTransactions: [],
-      createdBy: user.id,
     });
-    return customer.save();
+
+    const savedCustomer = await customer.save();
+    return savedCustomer;
   }
 
   static async getAllCustomers(
@@ -147,10 +170,11 @@ export class AccountsService {
     customer.lastTransactionDate = payload.date;
 
     // Add transaction to recent transactions
-    customer.recentTransactions.push(transaction);
-    if (customer.recentTransactions.length > 10) {
-      customer.recentTransactions = customer.recentTransactions.slice(-10);
-    }
+    const transactionObj = transaction.toObject();
+    customer.recentTransactions = [
+      ...customer.recentTransactions,
+      transactionObj,
+    ].slice(-10);
 
     await customer.save();
     return transaction;

@@ -15,6 +15,7 @@ import { Note } from '../note/note.model';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { FormData } from '../formData/formData.model';
 import bcrypt from 'bcrypt';
+import { CustomerAccount } from '../accounts/accounts.model';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -231,11 +232,20 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
     })
   );
 
+  const debtorsCount = await CustomerAccount.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          user: verifiedUser?.id,
+        }
+  );
+
   const result = {
     tallyCount,
     noteCount,
     username: findUser?.username,
     tallyData,
+    debtorsCount,
   };
 
   return result;

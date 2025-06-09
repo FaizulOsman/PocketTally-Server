@@ -40,10 +40,12 @@ const getAllCustomers: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const filters = pick(req.query, accountsFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
+    const user = req.user;
 
     const result = await AccountsService.getAllCustomers(
       filters,
-      paginationOptions
+      paginationOptions,
+      user
     );
 
     // Send Response

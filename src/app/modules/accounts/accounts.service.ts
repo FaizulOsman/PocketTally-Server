@@ -31,6 +31,7 @@ export class AccountsService {
 
     const findCustomer = await CustomerAccount.findOne({
       customerName: payload.customerName,
+      user: user?.id,
     });
     if (findCustomer) {
       throw new ApiError(
@@ -54,7 +55,8 @@ export class AccountsService {
 
   static async getAllCustomers(
     filters: any,
-    paginationOptions: IPaginationOptions
+    paginationOptions: IPaginationOptions,
+    user: any
   ): Promise<IGenericResponse<ICustomerAccount[]>> {
     const { searchTerm, ...filtersData } = filters;
     const andConditions = [];
@@ -92,12 +94,25 @@ export class AccountsService {
       sortConditions[sortBy] = sortOrder;
     }
 
-    const result = await CustomerAccount.find(whereConditions)
+    const result = await CustomerAccount.find(
+      user?.role === 'admin'
+        ? whereConditions
+        : {
+            $and: [whereConditions, { user: user?.id }],
+          }
+    )
+      .populate({ path: 'user', select: 'email' })
       .sort(sortConditions)
       .skip(skip)
       .limit(limit);
 
-    const total = await CustomerAccount.countDocuments(whereConditions);
+    const total = await CustomerAccount.countDocuments(
+      user?.role === 'admin'
+        ? whereConditions
+        : {
+            $and: [whereConditions, { user: user?.id }],
+          }
+    );
 
     return {
       meta: {

@@ -35,6 +35,7 @@ const note_model_1 = require("../note/note.model");
 const date_fns_1 = require("date-fns");
 const formData_model_1 = require("../formData/formData.model");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const accounts_model_1 = require("../accounts/accounts.model");
 const getAllUsers = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = [];
@@ -179,11 +180,17 @@ const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, functi
         }
         return { legend: form.formName, data };
     })));
+    const debtorsCount = yield accounts_model_1.CustomerAccount.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
     const result = {
         tallyCount,
         noteCount,
         username: findUser === null || findUser === void 0 ? void 0 : findUser.username,
         tallyData,
+        debtorsCount,
     };
     return result;
 });

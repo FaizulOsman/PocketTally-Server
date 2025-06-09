@@ -1,4 +1,4 @@
-export { accountsRouter } from './accounts.route';
+export { AccountsRoutes } from './accounts.route';
 export { AccountsService } from './accounts.service';
 export { AccountsController } from './accounts.controller';
 export * from './accounts.interface';

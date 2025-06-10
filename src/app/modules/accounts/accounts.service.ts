@@ -1,7 +1,7 @@
-import { CustomerAccount, Transaction } from './accounts.model';
+import { Debtor, Transaction } from './accounts.model';
 import {
-  ICustomerAccount,
-  ICreateCustomerDto,
+  IDebtors,
+  ICreateDebtorDto,
   ICreateTransactionDto,
   ITransaction,
 } from './accounts.interface';
@@ -14,49 +14,46 @@ import ApiError from '../../../errors/apiError';
 import httpStatus from 'http-status';
 
 export class AccountsService {
-  static async createCustomer(
+  static async createDebtor(
     user: any,
-    payload: ICreateCustomerDto
-  ): Promise<ICustomerAccount> {
+    payload: ICreateDebtorDto
+  ): Promise<IDebtors> {
     if (!user?.id) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
-        'User ID is required to create a customer'
+        'User ID is required to create a debtor'
       );
     }
 
-    if (!payload.customerName?.trim()) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Customer name is required');
+    if (!payload?.name?.trim()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Name is required');
     }
 
-    const findCustomer = await CustomerAccount.findOne({
-      customerName: payload.customerName,
+    const findDebtor = await Debtor.findOne({
+      name: payload?.name,
       user: user?.id,
     });
-    if (findCustomer) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        'Customer name already exist!'
-      );
+    if (findDebtor) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Debtor name already exist!');
     }
 
-    const customer = new CustomerAccount({
+    const debtor = new Debtor({
       user: user.id,
-      customerName: payload.customerName.trim(),
-      phoneNumber: payload.phoneNumber?.trim(),
-      description: payload.description?.trim(),
+      name: payload?.name.trim(),
+      phoneNumber: payload?.phoneNumber?.trim(),
+      description: payload?.description?.trim(),
       totalDue: 0,
     });
 
-    const savedCustomer = await customer.save();
-    return savedCustomer;
+    const savedDebtor = await debtor.save();
+    return savedDebtor;
   }
 
-  static async getAllCustomers(
+  static async getAllDebtors(
     filters: any,
     paginationOptions: IPaginationOptions,
     user: any
-  ): Promise<IGenericResponse<ICustomerAccount[]>> {
+  ): Promise<IGenericResponse<IDebtors[]>> {
     const { searchTerm, ...filtersData } = filters;
     const andConditions = [];
 
@@ -64,7 +61,7 @@ export class AccountsService {
       andConditions.push({
         $or: [
           {
-            customerName: {
+            name: {
               $regex: searchTerm,
               $options: 'i',
             },
@@ -93,7 +90,7 @@ export class AccountsService {
       sortConditions[sortBy] = sortOrder;
     }
 
-    const result = await CustomerAccount.find(
+    const result = await Debtor.find(
       user?.role === 'admin'
         ? whereConditions
         : {
@@ -105,7 +102,7 @@ export class AccountsService {
       .skip(skip)
       .limit(limit);
 
-    const total = await CustomerAccount.countDocuments(
+    const total = await Debtor.countDocuments(
       user?.role === 'admin'
         ? whereConditions
         : {
@@ -123,14 +120,14 @@ export class AccountsService {
     };
   }
 
-  static async getSingleCustomer(
+  static async getSingleDebtor(
     verifiedUser: any,
     id: string
-  ): Promise<ICustomerAccount | null> {
-    const findCustomer = await CustomerAccount.findById(id);
+  ): Promise<IDebtors | null> {
+    const findDebtor = await Debtor.findById(id);
 
     if (verifiedUser?.role !== 'admin') {
-      const userId = new ObjectId(findCustomer?.user).toHexString();
+      const userId = new ObjectId(findDebtor?.user).toHexString();
 
       if (userId !== verifiedUser?.id) {
         throw new ApiError(
@@ -140,45 +137,45 @@ export class AccountsService {
       }
     }
 
-    return findCustomer;
+    return findDebtor;
   }
 
-  static async updateCustomer(
+  static async updateDebtor(
     user: any,
     id: string,
-    payload: Partial<ICustomerAccount>
-  ): Promise<ICustomerAccount | null> {
-    const findCustomer = await CustomerAccount.findById(id);
-    if (!findCustomer) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    payload: Partial<IDebtors>
+  ): Promise<IDebtors | null> {
+    const findDebtor = await Debtor.findById(id);
+    if (!findDebtor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
     }
 
     if (user?.role !== 'admin') {
-      const userId = new ObjectId(findCustomer?.user).toHexString();
+      const userId = new ObjectId(findDebtor?.user).toHexString();
       if (userId !== user?.id) {
         throw new ApiError(
           httpStatus.NOT_FOUND,
-          'You are not authorized to update this customer!'
+          'You are not authorized to update this debtor!'
         );
       }
     }
 
-    // If customer name is being updated, check for duplicates
-    if (payload.customerName) {
-      const existingCustomer = await CustomerAccount.findOne({
-        customerName: payload.customerName,
+    // If debtor name is being updated, check for duplicates
+    if (payload.name) {
+      const existingDebtor = await Debtor.findOne({
+        name: payload.name,
         user: user.id,
         _id: { $ne: id },
       });
-      if (existingCustomer) {
+      if (existingDebtor) {
         throw new ApiError(
           httpStatus.BAD_REQUEST,
-          'Customer name already exists!'
+          'Debtor name already exists!'
         );
       }
     }
 
-    const result = await CustomerAccount.findByIdAndUpdate(
+    const result = await Debtor.findByIdAndUpdate(
       id,
       { $set: payload },
       { new: true }
@@ -187,11 +184,8 @@ export class AccountsService {
     return result;
   }
 
-  static async deleteCustomer(
-    user: any,
-    id: string
-  ): Promise<ICustomerAccount | null> {
-    return CustomerAccount.findOneAndDelete({ customerId: id });
+  static async deleteDebtor(user: any, id: string): Promise<IDebtors | null> {
+    return Debtor.findOneAndDelete({ debtorId: id });
   }
 
   static async createTransaction(
@@ -204,33 +198,33 @@ export class AccountsService {
     });
     await transaction.save();
 
-    const customer = await CustomerAccount.findById(payload?.customerId);
-    if (!customer) {
-      throw new Error('Customer not found');
+    const debtor = await Debtor.findById(payload?.debtorId);
+    if (!debtor) {
+      throw new Error('Debtor not found');
     }
 
-    // Update customer's total due
+    // Update debtors total due
     const amountChange =
       payload.type === 'CREDIT' ? payload.amount : -payload.amount;
-    customer.totalDue += amountChange;
-    customer.lastTransactionDate = payload.date;
+    debtor.totalDue += amountChange;
+    debtor.lastTransactionDate = payload.date;
 
-    await customer.save();
+    await debtor.save();
     return transaction;
   }
 
-  static async getCustomerTransactions(
+  static async getDebtorTransactions(
     user: any,
-    customerId: string,
+    debtorId: string,
     filters: any,
     paginationOptions: IPaginationOptions
   ): Promise<IGenericResponse<ITransaction[]>> {
     const { searchTerm, ...filtersData } = filters;
     const andConditions = [];
 
-    // Base condition for customerId
+    // Base condition for debtorId
     andConditions.push({
-      customerId: new ObjectId(customerId),
+      debtorId: new ObjectId(debtorId),
     });
 
     if (searchTerm) {
@@ -296,9 +290,9 @@ export class AccountsService {
       throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
     }
 
-    const customer = await CustomerAccount.findById(transaction.customerId);
-    if (!customer) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    const debtor = await Debtor.findById(transaction.debtorId);
+    if (!debtor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
     }
 
     // Calculate the difference in amount
@@ -313,14 +307,14 @@ export class AccountsService {
       { new: true }
     );
 
-    // Update customer's total due
+    // Update debtors total due
     if (transaction.type === 'CREDIT') {
-      customer.totalDue += amountDifference;
+      debtor.totalDue += amountDifference;
     } else {
-      customer.totalDue -= amountDifference;
+      debtor.totalDue -= amountDifference;
     }
 
-    await customer.save();
+    await debtor.save();
     return updatedTransaction;
   }
 
@@ -333,19 +327,19 @@ export class AccountsService {
       throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
     }
 
-    const customer = await CustomerAccount.findById(transaction.customerId);
-    if (!customer) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    const debtor = await Debtor.findById(transaction.debtorId);
+    if (!debtor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
     }
 
-    // Update customer's total due
+    // Update debtors total due
     if (transaction.type === 'CREDIT') {
-      customer.totalDue -= transaction.amount;
+      debtor.totalDue -= transaction.amount;
     } else {
-      customer.totalDue += transaction.amount;
+      debtor.totalDue += transaction.amount;
     }
 
-    await customer.save();
+    await debtor.save();
     return Transaction.findByIdAndDelete(id);
   }
 }

@@ -1,14 +1,14 @@
 import { Schema, model } from 'mongoose';
-import { ICustomerAccount, ITransaction } from './accounts.interface';
+import { IDebtors, ITransaction } from './accounts.interface';
 
-const customerAccountSchema = new Schema<ICustomerAccount>(
+const debtorSchema = new Schema<IDebtors>(
   {
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    customerName: {
+    name: {
       type: String,
       required: true,
     },
@@ -31,14 +31,14 @@ const customerAccountSchema = new Schema<ICustomerAccount>(
   }
 );
 
-// Add compound unique index for user and customerName
-customerAccountSchema.index({ user: 1, customerName: 1 }, { unique: true });
+// Add compound unique index for user and name
+debtorSchema.index({ user: 1, name: 1 }, { unique: true });
 
 const transactionSchema = new Schema<ITransaction>(
   {
-    customerId: {
+    debtorId: {
       type: Schema.Types.ObjectId,
-      ref: 'CustomerAccount',
+      ref: 'Debtor',
       required: true,
     },
     amount: {
@@ -68,10 +68,7 @@ const transactionSchema = new Schema<ITransaction>(
   }
 );
 
-export const CustomerAccount = model<ICustomerAccount>(
-  'CustomerAccount',
-  customerAccountSchema
-);
+export const Debtor = model<IDebtors>('Debtor', debtorSchema);
 export const Transaction = model<ITransaction>(
   'Transaction',
   transactionSchema

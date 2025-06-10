@@ -5,10 +5,10 @@ export const TRANSACTION_TYPES = {
 
 export const accountsFilterableFields = [
   'searchTerm',
-  'customerName',
+  'name',
   'type',
   'date',
   'amount',
 ];
 
-export const accountsSearchableFields = ['customerName', 'description'];
+export const accountsSearchableFields = ['name', 'description'];

@@ -2,7 +2,7 @@ import express from 'express';
 import { AccountsController } from './accounts.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import {
-  createCustomerSchema,
+  createDebtorSchema,
   createTransactionSchema,
 } from './accounts.validation';
 import auth from '../../middlewares/auth';
@@ -10,36 +10,36 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 
 const router = express.Router();
 
-// Customer Routes
+// Debtor Routes
 router.post(
-  '/create-customer',
+  '/create-debtor',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  validateRequest(createCustomerSchema),
-  AccountsController.createCustomer
+  validateRequest(createDebtorSchema),
+  AccountsController.createDebtor
 );
 
 router.get(
-  '/get-all-customers',
+  '/get-all-debtors',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getAllCustomers
+  AccountsController.getAllDebtors
 );
 
 router.get(
-  '/get-single-customer/:id',
+  '/get-single-debtor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getSingleCustomer
+  AccountsController.getSingleDebtor
 );
 
 router.patch(
-  '/update-customer/:id',
+  '/update-debtor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.updateCustomer
+  AccountsController.updateDebtor
 );
 
 router.delete(
-  '/delete-customer/:id',
+  '/delete-debtor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.deleteCustomer
+  AccountsController.deleteDebtor
 );
 
 // Transaction Routes
@@ -51,9 +51,9 @@ router.post(
 );
 
 router.get(
-  '/get-customer-transactions/:customerId',
+  '/get-debtor-transactions/:debtorId',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getCustomerTransactions
+  AccountsController.getDebtorTransactions
 );
 
 router.patch(

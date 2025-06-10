@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 export type ITransaction = {
   _id: Types.ObjectId;
-  customerId: Types.ObjectId;
+  debtorId: Types.ObjectId;
   amount: number;
   type: 'CREDIT' | 'DEBIT';
   date: string;
@@ -12,10 +12,10 @@ export type ITransaction = {
   updatedAt: Date;
 };
 
-export type ICustomerAccount = {
+export type IDebtors = {
   _id: Types.ObjectId;
   user: Types.ObjectId;
-  customerName: string;
+  name: string;
   phoneNumber?: string;
   description?: string;
   totalDue: number;
@@ -24,14 +24,14 @@ export type ICustomerAccount = {
   updatedAt: Date;
 };
 
-export type ICreateCustomerDto = {
-  customerName: string;
+export type ICreateDebtorDto = {
+  name: string;
   phoneNumber?: string;
   description?: string;
 };
 
 export type ICreateTransactionDto = {
-  customerId: string;
+  debtorId: string;
   amount: number;
   type: 'CREDIT' | 'DEBIT';
   date: string;

@@ -4,7 +4,7 @@ import { AccountsService } from './accounts.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import httpStatus from 'http-status';
-import { ICustomerAccount, ITransaction } from './accounts.interface';
+import { IDebtors, ITransaction } from './accounts.interface';
 import { accountsFilterableFields } from './accounts.constants';
 import { paginationFields } from '../../../constants/pagination';
 import { Secret } from 'jsonwebtoken';
@@ -12,8 +12,8 @@ import config from '../../../config';
 import { pick } from '../../../shared/pick';
 import { jwtHelpers } from '../../../helper/jwtHelpers';
 
-// Create Customer
-const createCustomer: RequestHandler = catchAsync(
+// Create Debtor
+const createDebtor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const { ...payload } = req.body;
 
@@ -23,44 +23,44 @@ const createCustomer: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.createCustomer(verifiedUser, payload);
+    const result = await AccountsService.createDebtor(verifiedUser, payload);
 
     // Send Response
-    sendResponse<ICustomerAccount>(res, {
+    sendResponse<IDebtors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customer Created Successfully',
+      message: 'Debtor Created Successfully',
       data: result,
     });
   }
 );
 
-// Get all Customers
-const getAllCustomers: RequestHandler = catchAsync(
+// Get all Debtors
+const getAllDebtors: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const filters = pick(req.query, accountsFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
     const user = req.user;
 
-    const result = await AccountsService.getAllCustomers(
+    const result = await AccountsService.getAllDebtors(
       filters,
       paginationOptions,
       user
     );
 
     // Send Response
-    sendResponse<ICustomerAccount[]>(res, {
+    sendResponse<IDebtors[]>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customers retrieved Successfully',
+      message: 'Debtors retrieved Successfully',
       meta: result.meta,
       data: result.data,
     });
   }
 );
 
-// Get single Customer
-const getSingleCustomer: RequestHandler = catchAsync(
+// Get single Debtors
+const getSingleDebtor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
 
@@ -70,20 +70,20 @@ const getSingleCustomer: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.getSingleCustomer(verifiedUser, id);
+    const result = await AccountsService.getSingleDebtor(verifiedUser, id);
 
     // Send Response
-    sendResponse<ICustomerAccount>(res, {
+    sendResponse<IDebtors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customer retrieved Successfully',
+      message: 'Debtor retrieved Successfully',
       data: result,
     });
   }
 );
 
-// Update Customer
-const updateCustomer: RequestHandler = catchAsync(
+// Update Debtors
+const updateDebtor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
     const { ...updateData } = req.body;
@@ -94,23 +94,23 @@ const updateCustomer: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.updateCustomer(
+    const result = await AccountsService.updateDebtor(
       verifiedUser,
       id,
       updateData
     );
 
-    sendResponse<ICustomerAccount>(res, {
+    sendResponse<IDebtors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customer updated Successfully',
+      message: 'Debtor updated Successfully',
       data: result,
     });
   }
 );
 
-// Delete Customer
-const deleteCustomer: RequestHandler = catchAsync(
+// Delete Debtors
+const deleteDebtor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
 
@@ -120,12 +120,12 @@ const deleteCustomer: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.deleteCustomer(verifiedUser, id);
+    const result = await AccountsService.deleteDebtor(verifiedUser, id);
 
-    sendResponse<ICustomerAccount>(res, {
+    sendResponse<IDebtors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Customer deleted Successfully',
+      message: 'Debtor deleted Successfully',
       data: result,
     });
   }
@@ -156,10 +156,10 @@ const createTransaction: RequestHandler = catchAsync(
   }
 );
 
-// Get Customer Transactions
-const getCustomerTransactions: RequestHandler = catchAsync(
+// Get Debtor Transactions
+const getDebtorTransactions: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    const customerId = req.params.customerId;
+    const debtorId = req.params.debtorId;
     const filters = pick(req.query, accountsFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
 
@@ -169,9 +169,9 @@ const getCustomerTransactions: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.getCustomerTransactions(
+    const result = await AccountsService.getDebtorTransactions(
       verifiedUser,
-      customerId,
+      debtorId,
       filters,
       paginationOptions
     );
@@ -236,13 +236,13 @@ const deleteTransaction: RequestHandler = catchAsync(
 );
 
 export const AccountsController = {
-  createCustomer,
-  getAllCustomers,
-  getSingleCustomer,
-  updateCustomer,
-  deleteCustomer,
+  createDebtor,
+  getAllDebtors,
+  getSingleDebtor,
+  updateDebtor,
+  deleteDebtor,
   createTransaction,
-  getCustomerTransactions,
+  getDebtorTransactions,
   updateTransaction,
   deleteTransaction,
 };

@@ -46,7 +46,6 @@ export class AccountsService {
       phoneNumber: payload.phoneNumber?.trim(),
       description: payload.description?.trim(),
       totalDue: 0,
-      recentTransactions: [],
     });
 
     const savedCustomer = await customer.save();
@@ -184,13 +183,6 @@ export class AccountsService {
     customer.totalDue += amountChange;
     customer.lastTransactionDate = payload.date;
 
-    // Add transaction to recent transactions
-    const transactionObj = transaction.toObject();
-    customer.recentTransactions = [
-      ...customer.recentTransactions,
-      transactionObj,
-    ].slice(-10);
-
     await customer.save();
     return transaction;
   }
@@ -260,5 +252,68 @@ export class AccountsService {
       },
       data: result,
     };
+  }
+
+  static async updateTransaction(
+    user: any,
+    id: string,
+    payload: Partial<ITransaction>
+  ): Promise<ITransaction | null> {
+    const transaction = await Transaction.findById(id);
+    if (!transaction) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
+    }
+
+    const customer = await CustomerAccount.findById(transaction.customerId);
+    if (!customer) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    }
+
+    // Calculate the difference in amount
+    const oldAmount = transaction.amount;
+    const newAmount = payload.amount || oldAmount;
+    const amountDifference = newAmount - oldAmount;
+
+    // Update transaction
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      id,
+      { ...payload },
+      { new: true }
+    );
+
+    // Update customer's total due
+    if (transaction.type === 'CREDIT') {
+      customer.totalDue += amountDifference;
+    } else {
+      customer.totalDue -= amountDifference;
+    }
+
+    await customer.save();
+    return updatedTransaction;
+  }
+
+  static async deleteTransaction(
+    user: any,
+    id: string
+  ): Promise<ITransaction | null> {
+    const transaction = await Transaction.findById(id);
+    if (!transaction) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
+    }
+
+    const customer = await CustomerAccount.findById(transaction.customerId);
+    if (!customer) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    }
+
+    // Update customer's total due
+    if (transaction.type === 'CREDIT') {
+      customer.totalDue -= transaction.amount;
+    } else {
+      customer.totalDue += transaction.amount;
+    }
+
+    await customer.save();
+    return Transaction.findByIdAndDelete(id);
   }
 }

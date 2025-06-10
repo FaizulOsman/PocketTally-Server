@@ -25,10 +25,6 @@ const customerAccountSchema = new Schema<ICustomerAccount>(
     lastTransactionDate: {
       type: String,
     },
-    recentTransactions: {
-      type: Schema.Types.Mixed,
-      default: [],
-    },
   },
   {
     timestamps: true,

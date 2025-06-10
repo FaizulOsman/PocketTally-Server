@@ -56,4 +56,16 @@ router.get(
   AccountsController.getCustomerTransactions
 );
 
+router.patch(
+  '/update-transaction/:id',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  AccountsController.updateTransaction
+);
+
+router.delete(
+  '/delete-transaction/:id',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  AccountsController.deleteTransaction
+);
+
 export const AccountsRoutes = router;

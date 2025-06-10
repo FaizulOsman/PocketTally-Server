@@ -20,7 +20,6 @@ export type ICustomerAccount = {
   description?: string;
   totalDue: number;
   lastTransactionDate?: string;
-  recentTransactions: any[];
   createdAt: Date;
   updatedAt: Date;
 };

@@ -1,4 +1,4 @@
-export interface IAccountTransaction {
+export type IAccountTransaction = {
   id: string;
   customerId: string;
   customerName: string;
@@ -8,9 +8,9 @@ export interface IAccountTransaction {
   date: Date;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface ICustomerAccount {
+export type ICustomerAccount = {
   id: string;
   name: string;
   phone?: string;
@@ -19,12 +19,11 @@ export interface ICustomerAccount {
   lastTransactionDate: Date;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-export interface IAccountSummary {
+export type IAccountSummary = {
   customerId: string;
   customerName: string;
   totalDue: number;
   lastTransactionDate: Date;
-  recentTransactions: IAccountTransaction[];
-}
+};

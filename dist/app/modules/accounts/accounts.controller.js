@@ -33,73 +33,73 @@ const pagination_1 = require("../../../constants/pagination");
 const config_1 = __importDefault(require("../../../config"));
 const pick_1 = require("../../../shared/pick");
 const jwtHelpers_1 = require("../../../helper/jwtHelpers");
-// Create Customer
-const createCustomer = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Create Debtor
+const createDebtor = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = __rest(req.body, []);
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield accounts_service_1.AccountsService.createCustomer(verifiedUser, payload);
+    const result = yield accounts_service_1.AccountsService.createDebtor(verifiedUser, payload);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Customer Created Successfully',
+        message: 'Debtor Created Successfully',
         data: result,
     });
 }));
-// Get all Customers
-const getAllCustomers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Get all Debtors
+const getAllDebtors = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, accounts_constants_1.accountsFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
     const user = req.user;
-    const result = yield accounts_service_1.AccountsService.getAllCustomers(filters, paginationOptions, user);
+    const result = yield accounts_service_1.AccountsService.getAllDebtors(filters, paginationOptions, user);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Customers retrieved Successfully',
+        message: 'Debtors retrieved Successfully',
         meta: result.meta,
         data: result.data,
     });
 }));
-// Get single Customer
-const getSingleCustomer = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Get single Debtors
+const getSingleDebtor = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield accounts_service_1.AccountsService.getSingleCustomer(verifiedUser, id);
+    const result = yield accounts_service_1.AccountsService.getSingleDebtor(verifiedUser, id);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Customer retrieved Successfully',
+        message: 'Debtor retrieved Successfully',
         data: result,
     });
 }));
-// Update Customer
-const updateCustomer = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Update Debtors
+const updateDebtor = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const updateData = __rest(req.body, []);
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield accounts_service_1.AccountsService.updateCustomer(verifiedUser, id, updateData);
+    const result = yield accounts_service_1.AccountsService.updateDebtor(verifiedUser, id, updateData);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Customer updated Successfully',
+        message: 'Debtor updated Successfully',
         data: result,
     });
 }));
-// Delete Customer
-const deleteCustomer = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Delete Debtors
+const deleteDebtor = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield accounts_service_1.AccountsService.deleteCustomer(verifiedUser, id);
+    const result = yield accounts_service_1.AccountsService.deleteDebtor(verifiedUser, id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Customer deleted Successfully',
+        message: 'Debtor deleted Successfully',
         data: result,
     });
 }));
@@ -116,14 +116,14 @@ const createTransaction = (0, catchAsync_1.default)((req, res) => __awaiter(void
         data: result,
     });
 }));
-// Get Customer Transactions
-const getCustomerTransactions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const customerId = req.params.customerId;
+// Get Debtor Transactions
+const getDebtorTransactions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const debtorId = req.params.debtorId;
     const filters = (0, pick_1.pick)(req.query, accounts_constants_1.accountsFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield accounts_service_1.AccountsService.getCustomerTransactions(verifiedUser, customerId, filters, paginationOptions);
+    const result = yield accounts_service_1.AccountsService.getDebtorTransactions(verifiedUser, debtorId, filters, paginationOptions);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -132,12 +132,41 @@ const getCustomerTransactions = (0, catchAsync_1.default)((req, res) => __awaite
         data: result.data,
     });
 }));
+// Update Transaction
+const updateTransaction = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const updateData = __rest(req.body, []);
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const result = yield accounts_service_1.AccountsService.updateTransaction(verifiedUser, id, updateData);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Transaction updated Successfully',
+        data: result,
+    });
+}));
+// Delete Transaction
+const deleteTransaction = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const result = yield accounts_service_1.AccountsService.deleteTransaction(verifiedUser, id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Transaction deleted Successfully',
+        data: result,
+    });
+}));
 exports.AccountsController = {
-    createCustomer,
-    getAllCustomers,
-    getSingleCustomer,
-    updateCustomer,
-    deleteCustomer,
+    createDebtor,
+    getAllDebtors,
+    getSingleDebtor,
+    updateDebtor,
+    deleteDebtor,
     createTransaction,
-    getCustomerTransactions,
+    getDebtorTransactions,
+    updateTransaction,
+    deleteTransaction,
 };

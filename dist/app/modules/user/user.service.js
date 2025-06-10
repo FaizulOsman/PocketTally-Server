@@ -180,7 +180,7 @@ const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, functi
         }
         return { legend: form.formName, data };
     })));
-    const debtorsCount = yield accounts_model_1.CustomerAccount.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+    const debtorsCount = yield accounts_model_1.Debtor.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
         ? {}
         : {
             user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,

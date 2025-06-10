@@ -7,9 +7,9 @@ exports.TRANSACTION_TYPES = {
 };
 exports.accountsFilterableFields = [
     'searchTerm',
-    'customerName',
+    'name',
     'type',
     'date',
     'amount',
 ];
-exports.accountsSearchableFields = ['customerName', 'description'];
+exports.accountsSearchableFields = ['name', 'description'];

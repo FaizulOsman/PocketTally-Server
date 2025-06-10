@@ -30,35 +30,34 @@ const mongodb_1 = require("mongodb");
 const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const http_status_1 = __importDefault(require("http-status"));
 class AccountsService {
-    static createCustomer(user, payload) {
+    static createDebtor(user, payload) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             if (!(user === null || user === void 0 ? void 0 : user.id)) {
-                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'User ID is required to create a customer');
+                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'User ID is required to create a debtor');
             }
-            if (!((_a = payload.customerName) === null || _a === void 0 ? void 0 : _a.trim())) {
-                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Customer name is required');
+            if (!((_a = payload === null || payload === void 0 ? void 0 : payload.name) === null || _a === void 0 ? void 0 : _a.trim())) {
+                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Name is required');
             }
-            const findCustomer = yield accounts_model_1.CustomerAccount.findOne({
-                customerName: payload.customerName,
+            const findDebtor = yield accounts_model_1.Debtor.findOne({
+                name: payload === null || payload === void 0 ? void 0 : payload.name,
                 user: user === null || user === void 0 ? void 0 : user.id,
             });
-            if (findCustomer) {
-                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Customer name already exist!');
+            if (findDebtor) {
+                throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Debtor name already exist!');
             }
-            const customer = new accounts_model_1.CustomerAccount({
+            const debtor = new accounts_model_1.Debtor({
                 user: user.id,
-                customerName: payload.customerName.trim(),
-                phoneNumber: (_b = payload.phoneNumber) === null || _b === void 0 ? void 0 : _b.trim(),
-                description: (_c = payload.description) === null || _c === void 0 ? void 0 : _c.trim(),
+                name: payload === null || payload === void 0 ? void 0 : payload.name.trim(),
+                phoneNumber: (_b = payload === null || payload === void 0 ? void 0 : payload.phoneNumber) === null || _b === void 0 ? void 0 : _b.trim(),
+                description: (_c = payload === null || payload === void 0 ? void 0 : payload.description) === null || _c === void 0 ? void 0 : _c.trim(),
                 totalDue: 0,
-                recentTransactions: [],
             });
-            const savedCustomer = yield customer.save();
-            return savedCustomer;
+            const savedDebtor = yield debtor.save();
+            return savedDebtor;
         });
     }
-    static getAllCustomers(filters, paginationOptions, user) {
+    static getAllDebtors(filters, paginationOptions, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
             const andConditions = [];
@@ -66,7 +65,7 @@ class AccountsService {
                 andConditions.push({
                     $or: [
                         {
-                            customerName: {
+                            name: {
                                 $regex: searchTerm,
                                 $options: 'i',
                             },
@@ -87,7 +86,7 @@ class AccountsService {
             if (sortBy && sortOrder) {
                 sortConditions[sortBy] = sortOrder;
             }
-            const result = yield accounts_model_1.CustomerAccount.find((user === null || user === void 0 ? void 0 : user.role) === 'admin'
+            const result = yield accounts_model_1.Debtor.find((user === null || user === void 0 ? void 0 : user.role) === 'admin'
                 ? whereConditions
                 : {
                     $and: [whereConditions, { user: user === null || user === void 0 ? void 0 : user.id }],
@@ -96,7 +95,7 @@ class AccountsService {
                 .sort(sortConditions)
                 .skip(skip)
                 .limit(limit);
-            const total = yield accounts_model_1.CustomerAccount.countDocuments((user === null || user === void 0 ? void 0 : user.role) === 'admin'
+            const total = yield accounts_model_1.Debtor.countDocuments((user === null || user === void 0 ? void 0 : user.role) === 'admin'
                 ? whereConditions
                 : {
                     $and: [whereConditions, { user: user === null || user === void 0 ? void 0 : user.id }],
@@ -111,57 +110,73 @@ class AccountsService {
             };
         });
     }
-    static getSingleCustomer(verifiedUser, id) {
+    static getSingleDebtor(verifiedUser, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const findCustomer = yield accounts_model_1.CustomerAccount.findById(id);
+            const findDebtor = yield accounts_model_1.Debtor.findById(id);
             if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) !== 'admin') {
-                const userId = new mongodb_1.ObjectId(findCustomer === null || findCustomer === void 0 ? void 0 : findCustomer.user).toHexString();
+                const userId = new mongodb_1.ObjectId(findDebtor === null || findDebtor === void 0 ? void 0 : findDebtor.user).toHexString();
                 if (userId !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id)) {
                     throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to access the data!');
                 }
             }
-            return findCustomer;
+            return findDebtor;
         });
     }
-    static updateCustomer(user, id, payload) {
+    static updateDebtor(user, id, payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            return accounts_model_1.CustomerAccount.findOneAndUpdate({ customerId: id }, { $set: payload }, { new: true });
+            const findDebtor = yield accounts_model_1.Debtor.findById(id);
+            if (!findDebtor) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Debtor not found');
+            }
+            if ((user === null || user === void 0 ? void 0 : user.role) !== 'admin') {
+                const userId = new mongodb_1.ObjectId(findDebtor === null || findDebtor === void 0 ? void 0 : findDebtor.user).toHexString();
+                if (userId !== (user === null || user === void 0 ? void 0 : user.id)) {
+                    throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to update this debtor!');
+                }
+            }
+            // If debtor name is being updated, check for duplicates
+            if (payload.name) {
+                const existingDebtor = yield accounts_model_1.Debtor.findOne({
+                    name: payload.name,
+                    user: user.id,
+                    _id: { $ne: id },
+                });
+                if (existingDebtor) {
+                    throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Debtor name already exists!');
+                }
+            }
+            const result = yield accounts_model_1.Debtor.findByIdAndUpdate(id, { $set: payload }, { new: true }).populate({ path: 'user', select: 'email' });
+            return result;
         });
     }
-    static deleteCustomer(user, id) {
+    static deleteDebtor(user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return accounts_model_1.CustomerAccount.findOneAndDelete({ customerId: id });
+            return accounts_model_1.Debtor.findOneAndDelete({ debtorId: id });
         });
     }
     static createTransaction(user, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             const transaction = new accounts_model_1.Transaction(Object.assign(Object.assign({}, payload), { createdBy: user.id }));
             yield transaction.save();
-            const customer = yield accounts_model_1.CustomerAccount.findById(payload === null || payload === void 0 ? void 0 : payload.customerId);
-            if (!customer) {
-                throw new Error('Customer not found');
+            const debtor = yield accounts_model_1.Debtor.findById(payload === null || payload === void 0 ? void 0 : payload.debtorId);
+            if (!debtor) {
+                throw new Error('Debtor not found');
             }
-            // Update customer's total due
+            // Update debtors total due
             const amountChange = payload.type === 'CREDIT' ? payload.amount : -payload.amount;
-            customer.totalDue += amountChange;
-            customer.lastTransactionDate = payload.date;
-            // Add transaction to recent transactions
-            const transactionObj = transaction.toObject();
-            customer.recentTransactions = [
-                ...customer.recentTransactions,
-                transactionObj,
-            ].slice(-10);
-            yield customer.save();
+            debtor.totalDue += amountChange;
+            debtor.lastTransactionDate = payload.date;
+            yield debtor.save();
             return transaction;
         });
     }
-    static getCustomerTransactions(user, customerId, filters, paginationOptions) {
+    static getDebtorTransactions(user, debtorId, filters, paginationOptions) {
         return __awaiter(this, void 0, void 0, function* () {
             const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
             const andConditions = [];
-            // Base condition for customerId
+            // Base condition for debtorId
             andConditions.push({
-                customerId: new mongodb_1.ObjectId(customerId),
+                debtorId: new mongodb_1.ObjectId(debtorId),
             });
             if (searchTerm) {
                 andConditions.push({
@@ -205,6 +220,54 @@ class AccountsService {
                 },
                 data: result,
             };
+        });
+    }
+    static updateTransaction(user, id, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const transaction = yield accounts_model_1.Transaction.findById(id);
+            if (!transaction) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Transaction not found');
+            }
+            const debtor = yield accounts_model_1.Debtor.findById(transaction.debtorId);
+            if (!debtor) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Debtor not found');
+            }
+            // Calculate the difference in amount
+            const oldAmount = transaction.amount;
+            const newAmount = payload.amount || oldAmount;
+            const amountDifference = newAmount - oldAmount;
+            // Update transaction
+            const updatedTransaction = yield accounts_model_1.Transaction.findByIdAndUpdate(id, Object.assign({}, payload), { new: true });
+            // Update debtors total due
+            if (transaction.type === 'CREDIT') {
+                debtor.totalDue += amountDifference;
+            }
+            else {
+                debtor.totalDue -= amountDifference;
+            }
+            yield debtor.save();
+            return updatedTransaction;
+        });
+    }
+    static deleteTransaction(user, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const transaction = yield accounts_model_1.Transaction.findById(id);
+            if (!transaction) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Transaction not found');
+            }
+            const debtor = yield accounts_model_1.Debtor.findById(transaction.debtorId);
+            if (!debtor) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Debtor not found');
+            }
+            // Update debtors total due
+            if (transaction.type === 'CREDIT') {
+                debtor.totalDue -= transaction.amount;
+            }
+            else {
+                debtor.totalDue += transaction.amount;
+            }
+            yield debtor.save();
+            return accounts_model_1.Transaction.findByIdAndDelete(id);
         });
     }
 }

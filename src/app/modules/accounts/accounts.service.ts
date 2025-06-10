@@ -148,11 +148,43 @@ export class AccountsService {
     id: string,
     payload: Partial<ICustomerAccount>
   ): Promise<ICustomerAccount | null> {
-    return CustomerAccount.findOneAndUpdate(
-      { customerId: id },
+    const findCustomer = await CustomerAccount.findById(id);
+    if (!findCustomer) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Customer not found');
+    }
+
+    if (user?.role !== 'admin') {
+      const userId = new ObjectId(findCustomer?.user).toHexString();
+      if (userId !== user?.id) {
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          'You are not authorized to update this customer!'
+        );
+      }
+    }
+
+    // If customer name is being updated, check for duplicates
+    if (payload.customerName) {
+      const existingCustomer = await CustomerAccount.findOne({
+        customerName: payload.customerName,
+        user: user.id,
+        _id: { $ne: id },
+      });
+      if (existingCustomer) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          'Customer name already exists!'
+        );
+      }
+    }
+
+    const result = await CustomerAccount.findByIdAndUpdate(
+      id,
       { $set: payload },
       { new: true }
-    );
+    ).populate({ path: 'user', select: 'email' });
+
+    return result;
   }
 
   static async deleteCustomer(

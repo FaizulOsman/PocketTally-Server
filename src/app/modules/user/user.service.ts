@@ -15,7 +15,7 @@ import { Note } from '../note/note.model';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { FormData } from '../formData/formData.model';
 import bcrypt from 'bcrypt';
-import { Debtor } from '../accounts/accounts.model';
+import { Transactor } from '../transactors/transactors.model';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -232,7 +232,7 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
     })
   );
 
-  const debtorsCount = await Debtor.countDocuments(
+  const transactorsCount = await Transactor.countDocuments(
     verifiedUser?.role === 'admin'
       ? {}
       : {
@@ -245,7 +245,7 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
     noteCount,
     username: findUser?.username,
     tallyData,
-    debtorsCount,
+    transactorsCount,
   };
 
   return result;

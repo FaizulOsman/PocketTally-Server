@@ -5,7 +5,7 @@ import { FormRoutes } from '../modules/form/form.route';
 import { FormDataRoutes } from '../modules/formData/formData.route';
 import { VCardRoutes } from '../modules/vCard/vCard.route';
 import { NoteRoutes } from '../modules/note/note.route';
-import { AccountsRoutes } from '../modules/accounts/accounts.route';
+import { TransactorsRoutes } from '../modules/transactors/transactors.route';
 
 const router = express.Router();
 
@@ -35,8 +35,8 @@ const moduleRoutes = [
     route: NoteRoutes,
   },
   {
-    path: '/accounts',
-    route: AccountsRoutes,
+    path: '/transactors',
+    route: TransactorsRoutes,
   },
 ];
 

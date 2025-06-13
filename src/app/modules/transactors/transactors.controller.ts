@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, RequestHandler, Response } from 'express';
-import { AccountsService } from './accounts.service';
+import { TransactorsService } from './transactors.service';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import httpStatus from 'http-status';
-import { IDebtors, ITransaction } from './accounts.interface';
-import { accountsFilterableFields } from './accounts.constants';
+import { ITransactors, ITransaction } from './transactors.interface';
+import { transactorsFilterableFields } from './transactors.constants';
 import { paginationFields } from '../../../constants/pagination';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 import { pick } from '../../../shared/pick';
 import { jwtHelpers } from '../../../helper/jwtHelpers';
 
-// Create Debtor
-const createDebtor: RequestHandler = catchAsync(
+// Create Transactor
+const createTransactor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const { ...payload } = req.body;
 
@@ -23,44 +23,47 @@ const createDebtor: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.createDebtor(verifiedUser, payload);
+    const result = await TransactorsService.createTransactor(
+      verifiedUser,
+      payload
+    );
 
     // Send Response
-    sendResponse<IDebtors>(res, {
+    sendResponse<ITransactors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Debtor Created Successfully',
+      message: 'Transactor Created Successfully',
       data: result,
     });
   }
 );
 
-// Get all Debtors
-const getAllDebtors: RequestHandler = catchAsync(
+// Get all Transactors
+const getAllTransactors: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    const filters = pick(req.query, accountsFilterableFields);
+    const filters = pick(req.query, transactorsFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
     const user = req.user;
 
-    const result = await AccountsService.getAllDebtors(
+    const result = await TransactorsService.getAllTransactors(
       filters,
       paginationOptions,
       user
     );
 
     // Send Response
-    sendResponse<IDebtors[]>(res, {
+    sendResponse<ITransactors[]>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Debtors retrieved Successfully',
+      message: 'Transactors retrieved Successfully',
       meta: result.meta,
       data: result.data,
     });
   }
 );
 
-// Get single Debtors
-const getSingleDebtor: RequestHandler = catchAsync(
+// Get single Transactors
+const getSingleTransactor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
 
@@ -70,20 +73,23 @@ const getSingleDebtor: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.getSingleDebtor(verifiedUser, id);
+    const result = await TransactorsService.getSingleTransactor(
+      verifiedUser,
+      id
+    );
 
     // Send Response
-    sendResponse<IDebtors>(res, {
+    sendResponse<ITransactors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Debtor retrieved Successfully',
+      message: 'Transactor retrieved Successfully',
       data: result,
     });
   }
 );
 
-// Update Debtors
-const updateDebtor: RequestHandler = catchAsync(
+// Update Transactors
+const updateTransactor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
     const { ...updateData } = req.body;
@@ -94,23 +100,23 @@ const updateDebtor: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.updateDebtor(
+    const result = await TransactorsService.updateTransactor(
       verifiedUser,
       id,
       updateData
     );
 
-    sendResponse<IDebtors>(res, {
+    sendResponse<ITransactors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Debtor updated Successfully',
+      message: 'Transactor updated Successfully',
       data: result,
     });
   }
 );
 
-// Delete Debtors
-const deleteDebtor: RequestHandler = catchAsync(
+// Delete Transactors
+const deleteTransactor: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const id = req.params.id;
 
@@ -120,12 +126,12 @@ const deleteDebtor: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.deleteDebtor(verifiedUser, id);
+    const result = await TransactorsService.deleteTransactor(verifiedUser, id);
 
-    sendResponse<IDebtors>(res, {
+    sendResponse<ITransactors>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Debtor deleted Successfully',
+      message: 'Transactor deleted Successfully',
       data: result,
     });
   }
@@ -142,7 +148,7 @@ const createTransaction: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.createTransaction(
+    const result = await TransactorsService.createTransaction(
       verifiedUser,
       payload
     );
@@ -156,11 +162,11 @@ const createTransaction: RequestHandler = catchAsync(
   }
 );
 
-// Get Debtor Transactions
-const getDebtorTransactions: RequestHandler = catchAsync(
+// Get Transactor Transactions
+const getTransactorTransactions: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    const debtorId = req.params.debtorId;
-    const filters = pick(req.query, accountsFilterableFields);
+    const transactorId = req.params.transactorId;
+    const filters = pick(req.query, transactorsFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
 
     const token: any = req.headers.authorization;
@@ -169,9 +175,9 @@ const getDebtorTransactions: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.getDebtorTransactions(
+    const result = await TransactorsService.getTransactorTransactions(
       verifiedUser,
-      debtorId,
+      transactorId,
       filters,
       paginationOptions
     );
@@ -198,7 +204,7 @@ const updateTransaction: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.updateTransaction(
+    const result = await TransactorsService.updateTransaction(
       verifiedUser,
       id,
       updateData
@@ -224,7 +230,7 @@ const deleteTransaction: RequestHandler = catchAsync(
       config.jwt.secret as Secret
     );
 
-    const result = await AccountsService.deleteTransaction(verifiedUser, id);
+    const result = await TransactorsService.deleteTransaction(verifiedUser, id);
 
     sendResponse<ITransaction>(res, {
       statusCode: httpStatus.OK,
@@ -235,14 +241,14 @@ const deleteTransaction: RequestHandler = catchAsync(
   }
 );
 
-export const AccountsController = {
-  createDebtor,
-  getAllDebtors,
-  getSingleDebtor,
-  updateDebtor,
-  deleteDebtor,
+export const TransactorsController = {
+  createTransactor,
+  getAllTransactors,
+  getSingleTransactor,
+  updateTransactor,
+  deleteTransactor,
   createTransaction,
-  getDebtorTransactions,
+  getTransactorTransactions,
   updateTransaction,
   deleteTransaction,
 };

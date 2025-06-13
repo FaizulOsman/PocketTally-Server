@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { TRANSACTION_TYPES } from './accounts.constants';
+import { TRANSACTION_TYPES } from './transactors.constants';
 
-export const createDebtorSchema = z.object({
+export const createTransactorSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'Name is required'),
     phoneNumber: z.string().optional(),
@@ -11,7 +11,7 @@ export const createDebtorSchema = z.object({
 
 export const createTransactionSchema = z.object({
   body: z.object({
-    debtorId: z.string().min(1, 'Debtor ID is required'),
+    transactorId: z.string().min(1, 'Transactor ID is required'),
     amount: z.number().positive('Amount must be positive'),
     type: z.enum([TRANSACTION_TYPES.CREDIT, TRANSACTION_TYPES.DEBIT]),
   }),

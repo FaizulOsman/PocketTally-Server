@@ -1,45 +1,45 @@
 import express from 'express';
-import { AccountsController } from './accounts.controller';
+import { TransactorsController } from './transactors.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import {
-  createDebtorSchema,
+  createTransactorSchema,
   createTransactionSchema,
-} from './accounts.validation';
+} from './transactors.validation';
 import auth from '../../middlewares/auth';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 
 const router = express.Router();
 
-// Debtor Routes
+// Transactor Routes
 router.post(
-  '/create-debtor',
+  '/create-transactor',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  validateRequest(createDebtorSchema),
-  AccountsController.createDebtor
+  validateRequest(createTransactorSchema),
+  TransactorsController.createTransactor
 );
 
 router.get(
-  '/get-all-debtors',
+  '/get-all-transactors',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getAllDebtors
+  TransactorsController.getAllTransactors
 );
 
 router.get(
-  '/get-single-debtor/:id',
+  '/get-single-transactor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getSingleDebtor
+  TransactorsController.getSingleTransactor
 );
 
 router.patch(
-  '/update-debtor/:id',
+  '/update-transactor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.updateDebtor
+  TransactorsController.updateTransactor
 );
 
 router.delete(
-  '/delete-debtor/:id',
+  '/delete-transactor/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.deleteDebtor
+  TransactorsController.deleteTransactor
 );
 
 // Transaction Routes
@@ -47,25 +47,25 @@ router.post(
   '/create-transaction',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   validateRequest(createTransactionSchema),
-  AccountsController.createTransaction
+  TransactorsController.createTransaction
 );
 
 router.get(
-  '/get-debtor-transactions/:debtorId',
+  '/get-transactor-transactions/:transactorId',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.getDebtorTransactions
+  TransactorsController.getTransactorTransactions
 );
 
 router.patch(
   '/update-transaction/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.updateTransaction
+  TransactorsController.updateTransaction
 );
 
 router.delete(
   '/delete-transaction/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AccountsController.deleteTransaction
+  TransactorsController.deleteTransaction
 );
 
-export const AccountsRoutes = router;
+export const TransactorsRoutes = router;

@@ -1,10 +1,5 @@
-import { Debtor, Transaction } from './accounts.model';
-import {
-  IDebtors,
-  ICreateDebtorDto,
-  ICreateTransactionDto,
-  ITransaction,
-} from './accounts.interface';
+import { Transactor, Transaction } from './transactors.model';
+import { ITransactors, ITransaction } from './transactors.interface';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { IGenericResponse } from '../../../interfaces/common';
 import { paginationHelper } from '../../../helper/paginationHelper';
@@ -13,15 +8,15 @@ import { ObjectId } from 'mongodb';
 import ApiError from '../../../errors/apiError';
 import httpStatus from 'http-status';
 
-export class AccountsService {
-  static async createDebtor(
+export class TransactorsService {
+  static async createTransactor(
     user: any,
-    payload: ICreateDebtorDto
-  ): Promise<IDebtors> {
+    payload: ITransactors
+  ): Promise<ITransactors> {
     if (!user?.id) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
-        'User ID is required to create a debtor'
+        'User ID is required to create a transactor'
       );
     }
 
@@ -29,32 +24,36 @@ export class AccountsService {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Name is required');
     }
 
-    const findDebtor = await Debtor.findOne({
+    const findTransactor = await Transactor.findOne({
       name: payload?.name,
       user: user?.id,
     });
-    if (findDebtor) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Debtor name already exist!');
+    if (findTransactor) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        'Transactor name already exist!'
+      );
     }
 
-    const debtor = new Debtor({
+    const transactor = new Transactor({
       user: user.id,
       name: payload?.name.trim(),
       phoneNumber: payload?.phoneNumber?.trim(),
       description: payload?.description?.trim(),
+      type: payload?.type.trim(),
       totalDue: 0,
     });
 
-    const savedDebtor = await debtor.save();
-    return savedDebtor;
+    const savedTransactor = await transactor.save();
+    return savedTransactor;
   }
 
-  static async getAllDebtors(
+  static async getAllTransactors(
     filters: any,
     paginationOptions: IPaginationOptions,
     user: any
-  ): Promise<IGenericResponse<IDebtors[]>> {
-    const { searchTerm, ...filtersData } = filters;
+  ): Promise<IGenericResponse<ITransactors[]>> {
+    const { searchTerm, type, showAllUsersData, ...filtersData } = filters;
     const andConditions = [];
 
     if (searchTerm) {
@@ -67,6 +66,14 @@ export class AccountsService {
             },
           },
         ],
+      });
+    }
+
+    if (type) {
+      andConditions.push({
+        type: {
+          $in: type || 'debtor',
+        },
       });
     }
 
@@ -90,8 +97,8 @@ export class AccountsService {
       sortConditions[sortBy] = sortOrder;
     }
 
-    const result = await Debtor.find(
-      user?.role === 'admin'
+    const result = await Transactor.find(
+      user?.role === 'admin' && showAllUsersData === 'true'
         ? whereConditions
         : {
             $and: [whereConditions, { user: user?.id }],
@@ -102,8 +109,8 @@ export class AccountsService {
       .skip(skip)
       .limit(limit);
 
-    const total = await Debtor.countDocuments(
-      user?.role === 'admin'
+    const total = await Transactor.countDocuments(
+      user?.role === 'admin' && showAllUsersData === 'true'
         ? whereConditions
         : {
             $and: [whereConditions, { user: user?.id }],
@@ -120,14 +127,14 @@ export class AccountsService {
     };
   }
 
-  static async getSingleDebtor(
+  static async getSingleTransactor(
     verifiedUser: any,
     id: string
-  ): Promise<IDebtors | null> {
-    const findDebtor = await Debtor.findById(id);
+  ): Promise<ITransactors | null> {
+    const findTransactor = await Transactor.findById(id);
 
     if (verifiedUser?.role !== 'admin') {
-      const userId = new ObjectId(findDebtor?.user).toHexString();
+      const userId = new ObjectId(findTransactor?.user).toHexString();
 
       if (userId !== verifiedUser?.id) {
         throw new ApiError(
@@ -137,45 +144,45 @@ export class AccountsService {
       }
     }
 
-    return findDebtor;
+    return findTransactor;
   }
 
-  static async updateDebtor(
+  static async updateTransactor(
     user: any,
     id: string,
-    payload: Partial<IDebtors>
-  ): Promise<IDebtors | null> {
-    const findDebtor = await Debtor.findById(id);
-    if (!findDebtor) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
+    payload: Partial<ITransactors>
+  ): Promise<ITransactors | null> {
+    const findTransactor = await Transactor.findById(id);
+    if (!findTransactor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transactor not found');
     }
 
     if (user?.role !== 'admin') {
-      const userId = new ObjectId(findDebtor?.user).toHexString();
+      const userId = new ObjectId(findTransactor?.user).toHexString();
       if (userId !== user?.id) {
         throw new ApiError(
           httpStatus.NOT_FOUND,
-          'You are not authorized to update this debtor!'
+          'You are not authorized to update this transactor!'
         );
       }
     }
 
-    // If debtor name is being updated, check for duplicates
+    // If transactor name is being updated, check for duplicates
     if (payload.name) {
-      const existingDebtor = await Debtor.findOne({
+      const existingTransactor = await Transactor.findOne({
         name: payload.name,
         user: user.id,
         _id: { $ne: id },
       });
-      if (existingDebtor) {
+      if (existingTransactor) {
         throw new ApiError(
           httpStatus.BAD_REQUEST,
-          'Debtor name already exists!'
+          'Transactor name already exists!'
         );
       }
     }
 
-    const result = await Debtor.findByIdAndUpdate(
+    const result = await Transactor.findByIdAndUpdate(
       id,
       { $set: payload },
       { new: true }
@@ -184,13 +191,16 @@ export class AccountsService {
     return result;
   }
 
-  static async deleteDebtor(user: any, id: string): Promise<IDebtors | null> {
-    return Debtor.findOneAndDelete({ debtorId: id });
+  static async deleteTransactor(
+    user: any,
+    id: string
+  ): Promise<ITransactors | null> {
+    return Transactor.findOneAndDelete({ transactorId: id });
   }
 
   static async createTransaction(
     user: any,
-    payload: ICreateTransactionDto
+    payload: ITransaction
   ): Promise<ITransaction> {
     const transaction = new Transaction({
       ...payload,
@@ -198,33 +208,33 @@ export class AccountsService {
     });
     await transaction.save();
 
-    const debtor = await Debtor.findById(payload?.debtorId);
-    if (!debtor) {
-      throw new Error('Debtor not found');
+    const transactor = await Transactor.findById(payload?.transactorId);
+    if (!transactor) {
+      throw new Error('Transactor not found');
     }
 
-    // Update debtors total due
+    // Update Transactors total due
     const amountChange =
       payload.type === 'CREDIT' ? payload.amount : -payload.amount;
-    debtor.totalDue += amountChange;
-    debtor.lastTransactionDate = payload.date;
+    transactor.totalDue += amountChange;
+    transactor.lastTransactionDate = payload.date;
 
-    await debtor.save();
+    await transactor.save();
     return transaction;
   }
 
-  static async getDebtorTransactions(
+  static async getTransactorTransactions(
     user: any,
-    debtorId: string,
+    transactorId: string,
     filters: any,
     paginationOptions: IPaginationOptions
   ): Promise<IGenericResponse<ITransaction[]>> {
     const { searchTerm, ...filtersData } = filters;
     const andConditions = [];
 
-    // Base condition for debtorId
+    // Base condition for transactorId
     andConditions.push({
-      debtorId: new ObjectId(debtorId),
+      transactorId: new ObjectId(transactorId),
     });
 
     if (searchTerm) {
@@ -290,9 +300,9 @@ export class AccountsService {
       throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
     }
 
-    const debtor = await Debtor.findById(transaction.debtorId);
-    if (!debtor) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
+    const transactor = await Transactor.findById(transaction.transactorId);
+    if (!transactor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transactor not found');
     }
 
     // Calculate the difference in amount
@@ -307,14 +317,14 @@ export class AccountsService {
       { new: true }
     );
 
-    // Update debtors total due
+    // Update transactors total due
     if (transaction.type === 'CREDIT') {
-      debtor.totalDue += amountDifference;
+      transactor.totalDue += amountDifference;
     } else {
-      debtor.totalDue -= amountDifference;
+      transactor.totalDue -= amountDifference;
     }
 
-    await debtor.save();
+    await transactor.save();
     return updatedTransaction;
   }
 
@@ -327,19 +337,19 @@ export class AccountsService {
       throw new ApiError(httpStatus.NOT_FOUND, 'Transaction not found');
     }
 
-    const debtor = await Debtor.findById(transaction.debtorId);
-    if (!debtor) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Debtor not found');
+    const transactor = await Transactor.findById(transaction.transactorId);
+    if (!transactor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transactor not found');
     }
 
-    // Update debtors total due
+    // Update transactors total due
     if (transaction.type === 'CREDIT') {
-      debtor.totalDue -= transaction.amount;
+      transactor.totalDue -= transaction.amount;
     } else {
-      debtor.totalDue += transaction.amount;
+      transactor.totalDue += transaction.amount;
     }
 
-    await debtor.save();
+    await transactor.save();
     return Transaction.findByIdAndDelete(id);
   }
 }

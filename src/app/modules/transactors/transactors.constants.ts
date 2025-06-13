@@ -3,12 +3,13 @@ export const TRANSACTION_TYPES = {
   DEBIT: 'DEBIT',
 } as const;
 
-export const accountsFilterableFields = [
+export const transactorsFilterableFields = [
   'searchTerm',
   'name',
   'type',
   'date',
   'amount',
+  'showAllUsersData',
 ];
 
-export const accountsSearchableFields = ['name', 'description'];
+export const transactorsSearchableFields = ['name', 'description'];

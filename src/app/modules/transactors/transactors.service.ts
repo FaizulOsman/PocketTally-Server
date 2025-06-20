@@ -117,13 +117,50 @@ export class TransactorsService {
           }
     );
 
+    // --- Calculate calculatedAmount for each transactor ---
+    const transactorIds = result.map(t => t._id);
+    const transactionSums = await Transaction.aggregate([
+      { $match: { transactorId: { $in: transactorIds } } },
+      {
+        $group: {
+          _id: '$transactorId',
+          credit: {
+            $sum: {
+              $cond: [{ $eq: ['$type', 'CREDIT'] }, '$amount', 0],
+            },
+          },
+          debit: {
+            $sum: {
+              $cond: [{ $eq: ['$type', 'DEBIT'] }, '$amount', 0],
+            },
+          },
+        },
+      },
+    ]);
+    const sumMap: Record<string, { credit: number; debit: number }> = {};
+    transactionSums.forEach(item => {
+      sumMap[item._id.toString()] = {
+        credit: item.credit || 0,
+        debit: item.debit || 0,
+      };
+    });
+    const resultWithCalculatedAmount = result.map(transactor => {
+      const sums = sumMap[transactor._id.toString()] || { credit: 0, debit: 0 };
+
+      return {
+        ...transactor.toObject(),
+        calculatedAmount: sums.credit - sums.debit,
+      };
+    });
+    // --- End calculatedAmount logic ---
+
     return {
       meta: {
         page,
         limit,
         total,
       },
-      data: result,
+      data: resultWithCalculatedAmount,
     };
   }
 

@@ -108,13 +108,45 @@ class TransactorsService {
                 : {
                     $and: [whereConditions, { user: user === null || user === void 0 ? void 0 : user.id }],
                 });
+            // --- Calculate calculatedAmount for each transactor ---
+            const transactorIds = result.map(t => t._id);
+            const transactionSums = yield transactors_model_1.Transaction.aggregate([
+                { $match: { transactorId: { $in: transactorIds } } },
+                {
+                    $group: {
+                        _id: '$transactorId',
+                        credit: {
+                            $sum: {
+                                $cond: [{ $eq: ['$type', 'CREDIT'] }, '$amount', 0],
+                            },
+                        },
+                        debit: {
+                            $sum: {
+                                $cond: [{ $eq: ['$type', 'DEBIT'] }, '$amount', 0],
+                            },
+                        },
+                    },
+                },
+            ]);
+            const sumMap = {};
+            transactionSums.forEach(item => {
+                sumMap[item._id.toString()] = {
+                    credit: item.credit || 0,
+                    debit: item.debit || 0,
+                };
+            });
+            const resultWithCalculatedAmount = result.map(transactor => {
+                const sums = sumMap[transactor._id.toString()] || { credit: 0, debit: 0 };
+                return Object.assign(Object.assign({}, transactor.toObject()), { calculatedAmount: sums.credit - sums.debit });
+            });
+            // --- End calculatedAmount logic ---
             return {
                 meta: {
                     page,
                     limit,
                     total,
                 },
-                data: result,
+                data: resultWithCalculatedAmount,
             };
         });
     }

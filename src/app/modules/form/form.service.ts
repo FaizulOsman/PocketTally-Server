@@ -153,7 +153,7 @@ const updateForm = async (
   id: string,
   payload: Partial<IForm>
 ): Promise<IForm | null> => {
-  const { formName, formData } = payload;
+  const { formName, formData, moreOptions } = payload;
 
   const isExist = await Form.findById(id);
   if (!isExist) {
@@ -162,7 +162,7 @@ const updateForm = async (
 
   const result = await Form.findByIdAndUpdate(
     id,
-    { formName, formData },
+    { formName, formData, moreOptions },
     {
       new: true,
     }

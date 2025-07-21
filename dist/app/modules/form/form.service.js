@@ -126,12 +126,12 @@ const getSingleForm = (verifiedUser, id) => __awaiter(void 0, void 0, void 0, fu
     return result;
 });
 const updateForm = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { formName, formData } = payload;
+    const { formName, formData, moreOptions } = payload;
     const isExist = yield form_model_1.Form.findById(id);
     if (!isExist) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Tally not found');
     }
-    const result = yield form_model_1.Form.findByIdAndUpdate(id, { formName, formData }, {
+    const result = yield form_model_1.Form.findByIdAndUpdate(id, { formName, formData, moreOptions }, {
         new: true,
     });
     return result;

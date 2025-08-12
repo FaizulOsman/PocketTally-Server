@@ -221,7 +221,17 @@ export class TransactorsService {
 
     const result = await Transactor.findByIdAndUpdate(
       id,
-      { $set: payload },
+      {
+        $set: {
+          ...payload,
+          name: payload.name?.trim() || findTransactor.name,
+          phoneNumber:
+            payload.phoneNumber?.trim() || findTransactor.phoneNumber,
+          description:
+            payload.description?.trim() || findTransactor.description,
+          type: payload.type?.trim() || findTransactor.type,
+        },
+      },
       { new: true }
     ).populate({ path: 'user', select: 'email' });
 

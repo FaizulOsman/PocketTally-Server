@@ -163,6 +163,7 @@ class TransactorsService {
         });
     }
     static updateTransactor(user, id, payload) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             const findTransactor = yield transactors_model_1.Transactor.findById(id);
             if (!findTransactor) {
@@ -185,7 +186,9 @@ class TransactorsService {
                     throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Transactor name already exists!');
                 }
             }
-            const result = yield transactors_model_1.Transactor.findByIdAndUpdate(id, { $set: payload }, { new: true }).populate({ path: 'user', select: 'email' });
+            const result = yield transactors_model_1.Transactor.findByIdAndUpdate(id, {
+                $set: Object.assign(Object.assign({}, payload), { name: ((_a = payload.name) === null || _a === void 0 ? void 0 : _a.trim()) || findTransactor.name, phoneNumber: ((_b = payload.phoneNumber) === null || _b === void 0 ? void 0 : _b.trim()) || findTransactor.phoneNumber, description: ((_c = payload.description) === null || _c === void 0 ? void 0 : _c.trim()) || findTransactor.description, type: ((_d = payload.type) === null || _d === void 0 ? void 0 : _d.trim()) || findTransactor.type }),
+            }, { new: true }).populate({ path: 'user', select: 'email' });
             return result;
         });
     }

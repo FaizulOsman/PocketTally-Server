@@ -47,7 +47,7 @@ const getAllNotes = async (
   paginationOptions: IPaginationOptions,
   verifiedUser: any
 ): Promise<IGenericResponse<INote[]>> => {
-  const { searchTerm, dateRange, ...filtersData } = filters;
+  const { searchTerm, dateRange, showAllUsersData, ...filtersData } = filters;
 
   const andConditions: Record<string, any>[] = [];
 
@@ -98,7 +98,7 @@ const getAllNotes = async (
     andConditions.length > 0 ? { $and: andConditions } : {};
 
   const query = Note.find(
-    verifiedUser?.role === 'admin'
+    verifiedUser?.role === 'admin' && showAllUsersData === 'true'
       ? whereCondition
       : {
           $and: [whereCondition, { user: verifiedUser?.id }],
@@ -113,7 +113,7 @@ const getAllNotes = async (
   const result = await query;
 
   const total = await Note.countDocuments(
-    verifiedUser?.role === 'admin'
+    verifiedUser?.role === 'admin' && showAllUsersData === 'true'
       ? whereCondition
       : {
           $and: [whereCondition, { user: verifiedUser?.id }],

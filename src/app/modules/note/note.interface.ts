@@ -16,4 +16,5 @@ export type INoteFilters = {
   description?: string;
   dateRange?: string;
   type?: string;
+  showAllUsersData?: string;
 };

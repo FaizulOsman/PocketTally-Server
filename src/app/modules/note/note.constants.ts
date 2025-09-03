@@ -3,6 +3,7 @@ export const noteFilterableFields = [
   'title',
   'description',
   'type',
+  'showAllUsersData',
 ];
 
 export const noteSearchableFields = [

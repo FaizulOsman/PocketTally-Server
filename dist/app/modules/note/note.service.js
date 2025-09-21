@@ -52,7 +52,7 @@ const createNote = (verifiedUser, payload) => __awaiter(void 0, void 0, void 0, 
 });
 // Get All
 const getAllNotes = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const { searchTerm, dateRange } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange"]);
+    const { searchTerm, dateRange, showAllUsersData } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange", "showAllUsersData"]);
     const andConditions = [];
     // Add search term filtering
     if (searchTerm) {
@@ -90,7 +90,7 @@ const getAllNotes = (filters, paginationOptions, verifiedUser) => __awaiter(void
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
     const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
     const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
-    const query = note_model_1.Note.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+    const query = note_model_1.Note.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin' && showAllUsersData === 'true'
         ? whereCondition
         : {
             $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],
@@ -102,7 +102,7 @@ const getAllNotes = (filters, paginationOptions, verifiedUser) => __awaiter(void
         query.populate({ path: 'user', select: 'email' });
     }
     const result = yield query;
-    const total = yield note_model_1.Note.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+    const total = yield note_model_1.Note.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin' && showAllUsersData === 'true'
         ? whereCondition
         : {
             $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],

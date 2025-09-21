@@ -6,6 +6,7 @@ exports.noteFilterableFields = [
     'title',
     'description',
     'type',
+    'showAllUsersData',
 ];
 exports.noteSearchableFields = [
     'searchTerm',

@@ -159,6 +159,19 @@ const deleteTransaction = (0, catchAsync_1.default)((req, res) => __awaiter(void
         data: result,
     });
 }));
+// Get Transactors Total
+const getTransactorsTotal = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.headers.authorization;
+    const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+    const { showAllUsersData } = req.query;
+    const result = yield transactors_service_1.TransactorsService.getTransactorsTotal(verifiedUser, showAllUsersData);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Transactors total retrieved Successfully',
+        data: result,
+    });
+}));
 exports.TransactorsController = {
     createTransactor,
     getAllTransactors,
@@ -169,4 +182,5 @@ exports.TransactorsController = {
     getTransactorTransactions,
     updateTransaction,
     deleteTransaction,
+    getTransactorsTotal,
 };

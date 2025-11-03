@@ -313,5 +313,35 @@ class TransactorsService {
             return transactors_model_1.Transaction.findByIdAndDelete(id);
         });
     }
+    static getTransactorsTotal(user, showAllUsersData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { id: userId, role } = user;
+            const matchConditions = {};
+            if (role !== 'admin' || showAllUsersData === 'false') {
+                matchConditions.user = new mongodb_1.ObjectId(userId);
+            }
+            const result = yield transactors_model_1.Transactor.aggregate([
+                {
+                    $match: matchConditions,
+                },
+                {
+                    $group: {
+                        _id: '$type',
+                        total: { $sum: '$totalDue' },
+                    },
+                },
+            ]);
+            const totals = result.reduce((acc, item) => {
+                if (item._id === 'DEBTOR') {
+                    acc.debtorsTotal = item.total;
+                }
+                else if (item._id === 'CREDITOR') {
+                    acc.creditorsTotal = item.total;
+                }
+                return acc;
+            }, { debtorsTotal: 0, creditorsTotal: 0 });
+            return totals;
+        });
+    }
 }
 exports.TransactorsService = TransactorsService;

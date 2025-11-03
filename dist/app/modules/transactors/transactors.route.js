@@ -22,4 +22,6 @@ router.post('/create-transaction', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USE
 router.get('/get-transactor-transactions/:transactorId', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), transactors_controller_1.TransactorsController.getTransactorTransactions);
 router.patch('/update-transaction/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), transactors_controller_1.TransactorsController.updateTransaction);
 router.delete('/delete-transaction/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), transactors_controller_1.TransactorsController.deleteTransaction);
+// Get Transactors Total
+router.get('/get-transactors-total', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), transactors_controller_1.TransactorsController.getTransactorsTotal);
 exports.TransactorsRoutes = router;

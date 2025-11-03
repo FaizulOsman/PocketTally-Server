@@ -68,4 +68,11 @@ router.delete(
   TransactorsController.deleteTransaction
 );
 
+// Get Transactors Total
+router.get(
+  '/get-transactors-total',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  TransactorsController.getTransactorsTotal
+);
+
 export const TransactorsRoutes = router;

@@ -399,4 +399,42 @@ export class TransactorsService {
     await transactor.save();
     return Transaction.findByIdAndDelete(id);
   }
+
+  static async getTransactorsTotal(
+    user: any,
+    showAllUsersData: any
+  ): Promise<any> {
+    const { id: userId, role } = user;
+
+    const matchConditions: any = {};
+    if (role !== 'admin' || showAllUsersData === 'false') {
+      matchConditions.user = new ObjectId(userId);
+    }
+
+    const result = await Transactor.aggregate([
+      {
+        $match: matchConditions,
+      },
+      {
+        $group: {
+          _id: '$type',
+          total: { $sum: '$totalDue' },
+        },
+      },
+    ]);
+
+    const totals = result.reduce(
+      (acc, item) => {
+        if (item._id === 'DEBTOR') {
+          acc.debtorsTotal = item.total;
+        } else if (item._id === 'CREDITOR') {
+          acc.creditorsTotal = item.total;
+        }
+        return acc;
+      },
+      { debtorsTotal: 0, creditorsTotal: 0 }
+    );
+
+    return totals;
+  }
 }

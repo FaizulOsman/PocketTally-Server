@@ -36,6 +36,7 @@ const date_fns_1 = require("date-fns");
 const formData_model_1 = require("../formData/formData.model");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const transactors_model_1 = require("../transactors/transactors.model");
+const sales_model_1 = require("../sales/sales.model");
 const getAllUsers = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = [];
@@ -185,12 +186,24 @@ const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, functi
         : {
             user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
         });
+    const monthlySalesCount = yield sales_model_1.SalesMonthly.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
+    const dailySalesCount = yield sales_model_1.SalesDaily.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
+        ? {}
+        : {
+            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
+        });
+    const salesCount = { monthlySalesCount, dailySalesCount };
     const result = {
         tallyCount,
         noteCount,
         username: findUser === null || findUser === void 0 ? void 0 : findUser.username,
         tallyData,
         transactorsCount,
+        salesCount,
     };
     return result;
 });

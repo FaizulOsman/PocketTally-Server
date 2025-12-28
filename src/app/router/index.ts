@@ -6,6 +6,7 @@ import { FormDataRoutes } from '../modules/formData/formData.route';
 import { VCardRoutes } from '../modules/vCard/vCard.route';
 import { NoteRoutes } from '../modules/note/note.route';
 import { TransactorsRoutes } from '../modules/transactors/transactors.route';
+import { SalesRoutes } from '../modules/sales/sales.route';
 
 const router = express.Router();
 
@@ -37,6 +38,10 @@ const moduleRoutes = [
   {
     path: '/transactors',
     route: TransactorsRoutes,
+  },
+  {
+    path: '/sales',
+    route: SalesRoutes,
   },
 ];
 

@@ -16,6 +16,7 @@ import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { FormData } from '../formData/formData.model';
 import bcrypt from 'bcrypt';
 import { Transactor } from '../transactors/transactors.model';
+import { SalesDaily, SalesMonthly } from '../sales/sales.model';
 
 const getAllUsers = async (
   filters: IUserFilter,
@@ -240,12 +241,31 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
         }
   );
 
+  const monthlySalesCount = await SalesMonthly.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          user: verifiedUser?.id,
+        }
+  );
+
+  const dailySalesCount = await SalesDaily.countDocuments(
+    verifiedUser?.role === 'admin'
+      ? {}
+      : {
+          user: verifiedUser?.id,
+        }
+  );
+
+  const salesCount = { monthlySalesCount, dailySalesCount };
+
   const result = {
     tallyCount,
     noteCount,
     username: findUser?.username,
     tallyData,
     transactorsCount,
+    salesCount,
   };
 
   return result;

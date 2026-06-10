@@ -31,8 +31,8 @@ const apiError_1 = __importDefault(require("../../../errors/apiError"));
 const http_status_1 = __importDefault(require("http-status"));
 class TransactorsService {
     static createTransactor(user, payload) {
-        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             if (!(user === null || user === void 0 ? void 0 : user.id)) {
                 throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'User ID is required to create a transactor');
             }
@@ -163,8 +163,8 @@ class TransactorsService {
         });
     }
     static updateTransactor(user, id, payload) {
-        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d;
             const findTransactor = yield transactors_model_1.Transactor.findById(id);
             if (!findTransactor) {
                 throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Transactor not found');

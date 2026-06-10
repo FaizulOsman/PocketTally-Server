@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -45,9 +55,9 @@ const logger = winston_1.default.createLogger({
     format: combine(label({ label: 'COW-HUT' }), timestamp(), myFormat),
     defaultMeta: { service: 'user-service' },
     transports: [
-        new winston_1.default.transports.Console(),
+        new winston_1.default.transports.Console(), // to show status in console
         new winston_daily_rotate_file_1.default({
-            filename: path_1.default.join(process.cwd(), 'logs', 'winston', 'success', 'CH-%DATE%-success.log'),
+            filename: path_1.default.join(process.cwd(), 'logs', 'winston', 'success', 'CH-%DATE%-success.log'), // Specify the file path for success logs
             datePattern: 'YYYY-MM-DD-HH',
             zippedArchive: true,
             maxSize: '20m',
@@ -62,9 +72,9 @@ const errorLogger = winston_1.default.createLogger({
     format: combine(label({ label: 'COW-HUT' }), timestamp(), myFormat),
     defaultMeta: { service: 'user-service' },
     transports: [
-        new winston_1.default.transports.Console(),
+        new winston_1.default.transports.Console(), // to show status in console
         new winston_daily_rotate_file_1.default({
-            filename: path_1.default.join(process.cwd(), 'logs', 'winston', 'error', 'CH-%DATE%-error.log'),
+            filename: path_1.default.join(process.cwd(), 'logs', 'winston', 'error', 'CH-%DATE%-error.log'), // Specify the file path for error logs
             datePattern: 'YYYY-MM-DD-HH',
             zippedArchive: true,
             maxSize: '20m',

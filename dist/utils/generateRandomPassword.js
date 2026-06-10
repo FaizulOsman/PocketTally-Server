@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = generateRandomPassword;
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 function generateRandomPassword() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -10,4 +11,3 @@ function generateRandomPassword() {
     }
     return password;
 }
-exports.default = generateRandomPassword;

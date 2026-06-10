@@ -27,7 +27,7 @@ const createSalesDailyZodValidation = zod_1.z.object({
         }),
         date: zod_1.z.string({
             required_error: 'Date is required',
-        }),
+        }), // Zod parses dates from strings
         title: zod_1.z.string({
             required_error: 'Title is required',
         }),

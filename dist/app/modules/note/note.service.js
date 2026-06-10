@@ -87,7 +87,7 @@ const getAllNotes = (filters, paginationOptions, verifiedUser) => __awaiter(void
             });
         }
     }
-    const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
+    const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(Object.assign({ sortBy: 'updatedAt', sortOrder: 'desc' }, paginationOptions));
     const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
     const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
     const query = note_model_1.Note.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin' && showAllUsersData === 'true'

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = generateRandomUsername;
 function generateRandomUsername(firstName, lastName) {
     // Generate a random number or string
     const randomSuffix = Math.random().toString(36).substring(2, 5);
@@ -7,4 +8,3 @@ function generateRandomUsername(firstName, lastName) {
     const username = (firstName + lastName).toLowerCase().replace(/\s+/g, '') + randomSuffix;
     return username;
 }
-exports.default = generateRandomUsername;

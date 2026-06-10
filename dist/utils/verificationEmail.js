@@ -12,7 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.googleLoginConfirmationMail = exports.calculateSentEmail = exports.sendVerificationMail = void 0;
+exports.googleLoginConfirmationMail = exports.sendVerificationMail = void 0;
+exports.calculateSentEmail = calculateSentEmail;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const globalModels_js_1 = require("../shared/globalModels.js");
 const index_js_1 = __importDefault(require("../config/index.js"));
@@ -37,7 +38,6 @@ function calculateSentEmail() {
     const year = String(d.getFullYear());
     return { day, month, year };
 }
-exports.calculateSentEmail = calculateSentEmail;
 const transporter = nodemailer_1.default.createTransport({
     service: 'gmail',
     tls: {

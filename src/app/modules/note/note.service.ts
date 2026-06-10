@@ -89,7 +89,11 @@ const getAllNotes = async (
   }
 
   const { page, limit, skip, sortBy, sortOrder } =
-    paginationHelper.calculatePagination(paginationOptions);
+    paginationHelper.calculatePagination({
+      sortBy: 'updatedAt',
+      sortOrder: 'desc',
+      ...paginationOptions,
+    });
 
   const sortCondition: { [key: string]: SortOrder } | '' =
     sortBy && sortOrder ? { [sortBy]: sortOrder } : '';

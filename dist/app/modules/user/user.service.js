@@ -24,6 +24,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const mongoose_1 = require("mongoose");
 const user_model_1 = require("./user.model");
 const paginationHelper_1 = require("../../../helper/paginationHelper");
 const user_constants_1 = require("./user.constants");
@@ -146,12 +148,15 @@ const updatePassword = (payload) => __awaiter(void 0, void 0, void 0, function* 
     }
     return newUpdatePasswordData;
 });
-const dashboardData = (verifiedUser, showAllUsersData) => __awaiter(void 0, void 0, void 0, function* () {
+const dashboardData = (verifiedUser, showAllUsersData, tallyYear, transactorsYear) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const findUser = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
     if (!findUser) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
     const isAdminShowAll = (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin' && showAllUsersData === 'true';
+    const targetTallyYear = tallyYear ? parseInt(tallyYear) : new Date().getFullYear();
+    const targetTransactorsYear = transactorsYear ? parseInt(transactorsYear) : new Date().getFullYear();
     const tallyCount = yield form_model_1.Form.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     const noteCount = yield note_model_1.Note.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     // Fetch all forms for the user
@@ -160,13 +165,13 @@ const dashboardData = (verifiedUser, showAllUsersData) => __awaiter(void 0, void
     const tallyData = yield Promise.all(forms.map((form) => __awaiter(void 0, void 0, void 0, function* () {
         const data = [];
         for (let i = 0; i < 12; i++) {
-            const start = (0, date_fns_1.startOfMonth)((0, date_fns_1.subMonths)(new Date(), i));
-            const end = (0, date_fns_1.endOfMonth)((0, date_fns_1.subMonths)(new Date(), i));
+            const start = new Date(targetTallyYear, i, 1);
+            const end = (0, date_fns_1.endOfMonth)(start);
             const count = yield formData_model_1.FormData.countDocuments({
                 form: form._id,
                 createdAt: { $gte: start, $lte: end },
             });
-            data.unshift(count); // Add to the beginning to maintain chronological order
+            data.push(count); // Add sequentially to align with Jan-Dec
         }
         return { legend: form.formName, data };
     })));
@@ -174,6 +179,51 @@ const dashboardData = (verifiedUser, showAllUsersData) => __awaiter(void 0, void
     const monthlySalesCount = yield sales_model_1.SalesMonthly.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     const dailySalesCount = yield sales_model_1.SalesDaily.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     const salesCount = { monthlySalesCount, dailySalesCount };
+    // Prepare transactorsData (monthly CREDIT vs DEBIT transaction totals for the selected calendar year)
+    const creditData = [];
+    const debitData = [];
+    for (let i = 0; i < 12; i++) {
+        const start = new Date(targetTransactorsYear, i, 1);
+        const end = (0, date_fns_1.endOfMonth)(start);
+        const creditMatchConditions = {
+            type: 'CREDIT',
+            createdAt: { $gte: start, $lte: end },
+        };
+        const debitMatchConditions = {
+            type: 'DEBIT',
+            createdAt: { $gte: start, $lte: end },
+        };
+        if (!isAdminShowAll && (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id)) {
+            creditMatchConditions.createdBy = new mongoose_1.Types.ObjectId(verifiedUser.id);
+            debitMatchConditions.createdBy = new mongoose_1.Types.ObjectId(verifiedUser.id);
+        }
+        const creditTransactions = yield transactors_model_1.Transaction.aggregate([
+            { $match: creditMatchConditions },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' },
+                },
+            },
+        ]);
+        const debitTransactions = yield transactors_model_1.Transaction.aggregate([
+            { $match: debitMatchConditions },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' },
+                },
+            },
+        ]);
+        const creditSum = ((_a = creditTransactions[0]) === null || _a === void 0 ? void 0 : _a.totalAmount) || 0;
+        const debitSum = ((_b = debitTransactions[0]) === null || _b === void 0 ? void 0 : _b.totalAmount) || 0;
+        creditData.push(creditSum);
+        debitData.push(debitSum);
+    }
+    const transactorsData = [
+        { legend: 'Total Credit', data: creditData },
+        { legend: 'Total Debit', data: debitData },
+    ];
     const result = {
         tallyCount,
         noteCount,
@@ -181,6 +231,7 @@ const dashboardData = (verifiedUser, showAllUsersData) => __awaiter(void 0, void
         tallyData,
         transactorsCount,
         salesCount,
+        transactorsData,
     };
     return result;
 });

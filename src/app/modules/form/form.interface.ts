@@ -22,4 +22,5 @@ export type IFormFilters = {
   searchTerm?: string;
   formName?: string;
   dateRange?: string;
+  showAllUsersData?: string;
 };

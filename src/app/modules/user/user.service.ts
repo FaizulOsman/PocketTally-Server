@@ -104,7 +104,7 @@ const updateUser = async (
 
 const deleteUser = async (id: string): Promise<IUser | null> => {
   const result = await User.findOneAndDelete({ _id: id });
-  return result;
+  return result as any;
 };
 
 const getMyProfile = async (
@@ -185,35 +185,28 @@ const updatePassword = async (payload: any): Promise<IUser> => {
   return newUpdatePasswordData;
 };
 
-const dashboardData = async (verifiedUser: JwtPayload | null) => {
+const dashboardData = async (
+  verifiedUser: JwtPayload | null,
+  showAllUsersData?: string
+) => {
   const findUser = await User.findById(verifiedUser?.id);
 
   if (!findUser) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
   }
 
+  const isAdminShowAll = verifiedUser?.role === 'admin' && showAllUsersData === 'true';
+
   const tallyCount = await Form.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
   const noteCount = await Note.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
 
   // Fetch all forms for the user
   const forms = await Form.find(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
 
   // Prepare tallyData
@@ -234,27 +227,15 @@ const dashboardData = async (verifiedUser: JwtPayload | null) => {
   );
 
   const transactorsCount = await Transactor.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
 
   const monthlySalesCount = await SalesMonthly.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
 
   const dailySalesCount = await SalesDaily.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? {}
-      : {
-          user: verifiedUser?.id,
-        }
+    isAdminShowAll ? {} : { user: verifiedUser?.id }
   );
 
   const salesCount = { monthlySalesCount, dailySalesCount };

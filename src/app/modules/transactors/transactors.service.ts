@@ -242,7 +242,7 @@ export class TransactorsService {
     user: any,
     id: string
   ): Promise<ITransactors | null> {
-    return Transactor.findOneAndDelete({ transactorId: id });
+    return Transactor.findOneAndDelete({ transactorId: id }) as any;
   }
 
   static async createTransaction(

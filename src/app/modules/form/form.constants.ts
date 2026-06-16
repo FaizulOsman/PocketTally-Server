@@ -1,3 +1,8 @@
-export const formFilterableFields = ['searchTerm', 'formName', 'dateRange'];
+export const formFilterableFields = [
+  'searchTerm',
+  'formName',
+  'dateRange',
+  'showAllUsersData',
+];
 
 export const formSearchableFields = ['searchTerm', 'formName'];

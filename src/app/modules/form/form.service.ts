@@ -48,7 +48,7 @@ const getAllForms = async (
   paginationOptions: IPaginationOptions,
   verifiedUser: any
 ): Promise<IGenericResponse<IForm[]>> => {
-  const { searchTerm, dateRange, ...filtersData } = filters;
+  const { searchTerm, dateRange, showAllUsersData, ...filtersData } = filters;
 
   const andConditions: Record<string, any>[] = [];
 
@@ -89,6 +89,11 @@ const getAllForms = async (
     }
   }
 
+  // Add user role restriction if not admin or if showAllUsersData is not true
+  if (verifiedUser?.role !== 'admin' || showAllUsersData !== 'true') {
+    andConditions.push({ user: verifiedUser?.id });
+  }
+
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
@@ -98,25 +103,13 @@ const getAllForms = async (
   const whereCondition =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  const result = await Form.find(
-    verifiedUser?.role === 'admin'
-      ? whereCondition
-      : {
-          $and: [whereCondition, { user: verifiedUser?.id }],
-        }
-  )
+  const result = await Form.find(whereCondition)
     .populate({ path: 'user', select: 'email' })
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
 
-  const total = await Form.countDocuments(
-    verifiedUser?.role === 'admin'
-      ? whereCondition
-      : {
-          $and: [whereCondition, { user: verifiedUser?.id }],
-        }
-  );
+  const total = await Form.countDocuments(whereCondition);
 
   return {
     meta: {

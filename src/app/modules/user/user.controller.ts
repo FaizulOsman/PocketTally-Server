@@ -144,7 +144,9 @@ const dashboardData: RequestHandler = catchAsync(async (req, res) => {
     config.jwt.secret as Secret
   );
 
-  const result = await UserService.dashboardData(verifiedUser);
+  const { showAllUsersData } = req.query;
+
+  const result = await UserService.dashboardData(verifiedUser, showAllUsersData as string);
 
   sendResponse<any>(res, {
     statusCode: httpStatus.OK,

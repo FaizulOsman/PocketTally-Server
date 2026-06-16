@@ -146,27 +146,16 @@ const updatePassword = (payload) => __awaiter(void 0, void 0, void 0, function* 
     }
     return newUpdatePasswordData;
 });
-const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+const dashboardData = (verifiedUser, showAllUsersData) => __awaiter(void 0, void 0, void 0, function* () {
     const findUser = yield user_model_1.User.findById(verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id);
     if (!findUser) {
         throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
-    const tallyCount = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
-    const noteCount = yield note_model_1.Note.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
+    const isAdminShowAll = (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin' && showAllUsersData === 'true';
+    const tallyCount = yield form_model_1.Form.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
+    const noteCount = yield note_model_1.Note.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     // Fetch all forms for the user
-    const forms = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
+    const forms = yield form_model_1.Form.find(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     // Prepare tallyData
     const tallyData = yield Promise.all(forms.map((form) => __awaiter(void 0, void 0, void 0, function* () {
         const data = [];
@@ -181,21 +170,9 @@ const dashboardData = (verifiedUser) => __awaiter(void 0, void 0, void 0, functi
         }
         return { legend: form.formName, data };
     })));
-    const transactorsCount = yield transactors_model_1.Transactor.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
-    const monthlySalesCount = yield sales_model_1.SalesMonthly.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
-    const dailySalesCount = yield sales_model_1.SalesDaily.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? {}
-        : {
-            user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id,
-        });
+    const transactorsCount = yield transactors_model_1.Transactor.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
+    const monthlySalesCount = yield sales_model_1.SalesMonthly.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
+    const dailySalesCount = yield sales_model_1.SalesDaily.countDocuments(isAdminShowAll ? {} : { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     const salesCount = { monthlySalesCount, dailySalesCount };
     const result = {
         tallyCount,

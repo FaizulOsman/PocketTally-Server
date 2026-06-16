@@ -53,7 +53,7 @@ const createForm = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
 });
 // Get All Forms (can also filter)
 const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
-    const { searchTerm, dateRange } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange"]);
+    const { searchTerm, dateRange, showAllUsersData } = filters, filtersData = __rest(filters, ["searchTerm", "dateRange", "showAllUsersData"]);
     const andConditions = [];
     // Add search term filtering
     if (searchTerm) {
@@ -88,23 +88,19 @@ const getAllForms = (filters, paginationOptions, verifiedUser) => __awaiter(void
             });
         }
     }
+    // Add user role restriction if not admin or if showAllUsersData is not true
+    if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) !== 'admin' || showAllUsersData !== 'true') {
+        andConditions.push({ user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
+    }
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
     const sortCondition = sortBy && sortOrder ? { [sortBy]: sortOrder } : '';
     const whereCondition = andConditions.length > 0 ? { $and: andConditions } : {};
-    const result = yield form_model_1.Form.find((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? whereCondition
-        : {
-            $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],
-        })
+    const result = yield form_model_1.Form.find(whereCondition)
         .populate({ path: 'user', select: 'email' })
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
-    const total = yield form_model_1.Form.countDocuments((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'admin'
-        ? whereCondition
-        : {
-            $and: [whereCondition, { user: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id }],
-        });
+    const total = yield form_model_1.Form.countDocuments(whereCondition);
     return {
         meta: {
             page,

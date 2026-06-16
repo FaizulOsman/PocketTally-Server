@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SortOrder } from 'mongoose';
+import { SortOrder, Types } from 'mongoose';
 import { IUser, IUserFilter } from './user.interface';
 import { User } from './user.model';
 import { IGenericResponse } from '../../../interfaces/common';
@@ -15,7 +15,7 @@ import { Note } from '../note/note.model';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { FormData } from '../formData/formData.model';
 import bcrypt from 'bcrypt';
-import { Transactor } from '../transactors/transactors.model';
+import { Transactor, Transaction } from '../transactors/transactors.model';
 import { SalesDaily, SalesMonthly } from '../sales/sales.model';
 
 const getAllUsers = async (
@@ -187,7 +187,9 @@ const updatePassword = async (payload: any): Promise<IUser> => {
 
 const dashboardData = async (
   verifiedUser: JwtPayload | null,
-  showAllUsersData?: string
+  showAllUsersData?: string,
+  tallyYear?: string,
+  transactorsYear?: string
 ) => {
   const findUser = await User.findById(verifiedUser?.id);
 
@@ -196,6 +198,8 @@ const dashboardData = async (
   }
 
   const isAdminShowAll = verifiedUser?.role === 'admin' && showAllUsersData === 'true';
+  const targetTallyYear = tallyYear ? parseInt(tallyYear) : new Date().getFullYear();
+  const targetTransactorsYear = transactorsYear ? parseInt(transactorsYear) : new Date().getFullYear();
 
   const tallyCount = await Form.countDocuments(
     isAdminShowAll ? {} : { user: verifiedUser?.id }
@@ -214,13 +218,13 @@ const dashboardData = async (
     forms.map(async form => {
       const data = [];
       for (let i = 0; i < 12; i++) {
-        const start = startOfMonth(subMonths(new Date(), i));
-        const end = endOfMonth(subMonths(new Date(), i));
+        const start = new Date(targetTallyYear, i, 1);
+        const end = endOfMonth(start);
         const count = await FormData.countDocuments({
           form: form._id,
           createdAt: { $gte: start, $lte: end },
         });
-        data.unshift(count); // Add to the beginning to maintain chronological order
+        data.push(count); // Add sequentially to align with Jan-Dec
       }
       return { legend: form.formName, data };
     })
@@ -240,6 +244,60 @@ const dashboardData = async (
 
   const salesCount = { monthlySalesCount, dailySalesCount };
 
+  // Prepare transactorsData (monthly CREDIT vs DEBIT transaction totals for the selected calendar year)
+  const creditData: number[] = [];
+  const debitData: number[] = [];
+
+  for (let i = 0; i < 12; i++) {
+    const start = new Date(targetTransactorsYear, i, 1);
+    const end = endOfMonth(start);
+
+    const creditMatchConditions: any = {
+      type: 'CREDIT',
+      createdAt: { $gte: start, $lte: end },
+    };
+    const debitMatchConditions: any = {
+      type: 'DEBIT',
+      createdAt: { $gte: start, $lte: end },
+    };
+
+    if (!isAdminShowAll && verifiedUser?.id) {
+      creditMatchConditions.createdBy = new Types.ObjectId(verifiedUser.id);
+      debitMatchConditions.createdBy = new Types.ObjectId(verifiedUser.id);
+    }
+
+    const creditTransactions = await Transaction.aggregate([
+      { $match: creditMatchConditions },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const debitTransactions = await Transaction.aggregate([
+      { $match: debitMatchConditions },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const creditSum = creditTransactions[0]?.totalAmount || 0;
+    const debitSum = debitTransactions[0]?.totalAmount || 0;
+
+    creditData.push(creditSum);
+    debitData.push(debitSum);
+  }
+
+  const transactorsData = [
+    { legend: 'Total Credit', data: creditData },
+    { legend: 'Total Debit', data: debitData },
+  ];
+
   const result = {
     tallyCount,
     noteCount,
@@ -247,6 +305,7 @@ const dashboardData = async (
     tallyData,
     transactorsCount,
     salesCount,
+    transactorsData,
   };
 
   return result;

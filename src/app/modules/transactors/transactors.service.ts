@@ -242,7 +242,23 @@ export class TransactorsService {
     user: any,
     id: string
   ): Promise<ITransactors | null> {
-    return Transactor.findOneAndDelete({ transactorId: id }) as any;
+    const findTransactor = await Transactor.findById(id);
+    if (!findTransactor) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Transactor not found');
+    }
+
+    if (user?.role !== 'admin') {
+      const userId = new ObjectId(findTransactor?.user).toHexString();
+      if (userId !== user?.id) {
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          'You are not authorized to delete this transactor!'
+        );
+      }
+    }
+
+    const result = (await Transactor.findByIdAndDelete(id)) as any;
+    return result;
   }
 
   static async createTransaction(

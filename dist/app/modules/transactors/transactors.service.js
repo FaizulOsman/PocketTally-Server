@@ -194,7 +194,18 @@ class TransactorsService {
     }
     static deleteTransactor(user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return transactors_model_1.Transactor.findOneAndDelete({ transactorId: id });
+            const findTransactor = yield transactors_model_1.Transactor.findById(id);
+            if (!findTransactor) {
+                throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'Transactor not found');
+            }
+            if ((user === null || user === void 0 ? void 0 : user.role) !== 'admin') {
+                const userId = new mongodb_1.ObjectId(findTransactor === null || findTransactor === void 0 ? void 0 : findTransactor.user).toHexString();
+                if (userId !== (user === null || user === void 0 ? void 0 : user.id)) {
+                    throw new apiError_1.default(http_status_1.default.NOT_FOUND, 'You are not authorized to delete this transactor!');
+                }
+            }
+            const result = (yield transactors_model_1.Transactor.findByIdAndDelete(id));
+            return result;
         });
     }
     static createTransaction(user, payload) {

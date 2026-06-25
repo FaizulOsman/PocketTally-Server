@@ -11,6 +11,7 @@ export type IGenericResponse<T> = {
     page: number;
     limit: number;
     total: number;
+    sumData?: Record<string, number>;
   };
   data: T;
 };

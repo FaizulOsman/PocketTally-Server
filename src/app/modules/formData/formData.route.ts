@@ -19,6 +19,12 @@ router.delete(
 );
 
 router.get(
+  '/export-pdf',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  FormDataController.exportPDF
+);
+
+router.get(
   '/:id',
   auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   FormDataController.getSingleData

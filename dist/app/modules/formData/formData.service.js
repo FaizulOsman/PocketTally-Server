@@ -140,11 +140,31 @@ const getAllData = (filters, paginationOptions) => __awaiter(void 0, void 0, voi
     // Apply pagination after sorting
     const paginatedResult = result.slice(skip, skip + limit);
     const total = yield formData_model_1.FormData.countDocuments(whereCondition);
+    const allDataForForm = yield formData_model_1.FormData.find({ form: filtersData.form });
+    const sumData = {};
+    allDataForForm.forEach(item => {
+        if (item.data) {
+            try {
+                const parsedData = JSON.parse(item.data);
+                if (parsedData && typeof parsedData === 'object') {
+                    Object.entries(parsedData).forEach(([key, value]) => {
+                        if (typeof value === 'number') {
+                            sumData[key] = (sumData[key] || 0) + value;
+                        }
+                    });
+                }
+            }
+            catch (e) {
+                // ignore parsing errors
+            }
+        }
+    });
     return {
         meta: {
             page,
             limit,
             total,
+            sumData,
         },
         data: paginatedResult,
     };

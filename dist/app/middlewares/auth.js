@@ -19,7 +19,7 @@ const config_1 = __importDefault(require("../../config"));
 const auth = (...requiredRoles) => (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         //get authorization token
-        const token = req.headers.authorization;
+        const token = req.headers.authorization || req.query.token;
         if (!token) {
             throw new apiError_1.default(http_status_1.default.UNAUTHORIZED, 'You are not authorized.');
         }
